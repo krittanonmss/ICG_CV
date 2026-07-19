@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>24-bit Raster Graphics</title>
+  <style>
+    :root { --ink:#172033; --muted:#667085; --blue:#3157d5; --pale:#f5f7fb; --line:#dfe3ea; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; padding:32px 20px; color:var(--ink); background:var(--pale); font-family:Inter,system-ui,sans-serif; }
+    main { width:min(100%,880px); }
+    .top { display:flex; justify-content:space-between; align-items:end; gap:20px; margin-bottom:22px; }
+    h1 { margin:0; font-size:clamp(1.8rem,5vw,3.2rem); letter-spacing:-.045em; }
+    p { margin:8px 0 0; color:var(--muted); }
+    .panel { display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:16px; }
+    canvas { display:block; width:100%; aspect-ratio:1; border:1px solid var(--line); border-radius:12px; background:white; image-rendering:pixelated; cursor:grab; touch-action:none; }
+    canvas:active { cursor:grabbing; }
+    .controls { padding:20px; border:1px solid var(--line); border-radius:12px; background:white; }
+    .controls h2 { margin:0 0 18px; font-size:.9rem; }
+    .control { padding:14px 0; border-top:1px solid var(--line); }
+    .control strong,.control small { display:block; }
+    .control strong { font-size:.8rem; }
+    .control small { margin-top:4px; color:var(--muted); }
+    .status { margin-top:16px; padding:12px; border-radius:8px; background:var(--pale); font:12px/1.8 monospace; }
+    button { width:100%; margin-top:16px; padding:9px; border:1px solid var(--blue); border-radius:7px; color:var(--blue); background:white; cursor:pointer; }
+    button:hover { color:white; background:var(--blue); }
+    @media(max-width:680px){.top{align-items:start;flex-direction:column}.panel{grid-template-columns:1fr}.controls{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.controls h2,.status,button{grid-column:1/-1}}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="top">
+      <div><h1>24-bit Raster Graphics</h1><p>A pixel rocket drawn directly into an ImageData buffer.</p></div>
+    </div>
+
+    <div class="panel">
+      <canvas id="canvas" width="200" height="200" aria-label="Interactive 24-bit rocket sprite"></canvas>
+      <aside class="controls">
+        <h2>Keyboard controls</h2>
+        <div class="status"><div id="position">X: 100 · Y: 100</div></div>
+        <button id="reset" type="button">Reset</button>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.createImageData(canvas.width, canvas.height);
+    const pixels = imageData.data;
+
+    function putPixel(x, y, r, g, b, a = 255) {
+      x = Math.round(x);
+      y = Math.round(y);
+      if (x < 0 || x >= canvas.width || y < 0 || y >= canvas.height) return;
+      const index = (y * canvas.width + x) * 4;
+      pixels[index] = r;
+      pixels[index + 1] = g;
+      pixels[index + 2] = b;
+      pixels[index + 3] = a;
+    }
+
+    function drawRectFilled(x1, y1, x2, y2, r, g, b, a = 255) {
+      for (let y = y1; y <= y2; y++) {
+        for (let x = x1; x <= x2; x++) putPixel(x, y, r, g, b, a);
+      }
+    }
+
+    function drawPixelBlock(x, y, size, r, g, b) {
+      const radius = Math.max(0, Math.ceil(size / 2) - 1);
+      drawRectFilled(x - radius, y - radius, x + radius, y + radius, r, g, b);
+    }
+
+    // Each number is a 24-bit RGB value: 0xRRGGBB. null means transparent.
+    const rocketSprite24Bit = [
+      [null,null,null,0xE8F0FF,0xE8F0FF,null,null,null],
+      [null,null,0xE8F0FF,0xE8F0FF,0xE8F0FF,0xE8F0FF,null,null],
+      [null,null,0x3157D5,0xE8F0FF,0xE8F0FF,0x3157D5,null,null],
+      [null,null,0x3157D5,0x45C2D3,0x45C2D3,0x3157D5,null,null],
+      [null,0x3157D5,0x3157D5,0xE8F0FF,0xE8F0FF,0x3157D5,0x3157D5,null],
+      [0xFF6B4A,0x3157D5,0x3157D5,0xE8F0FF,0xE8F0FF,0x3157D5,0x3157D5,0xFF6B4A],
+      [0xFF6B4A,null,0x3157D5,0x3157D5,0x3157D5,0x3157D5,null,0xFF6B4A],
+      [null,null,0xFFB020,null,null,0xFFB020,null,null],
+      [null,null,0xFF6B4A,null,null,0xFF6B4A,null,null]
+    ];
+
+    let state = { x: 100, y: 100, degree: 0, scale: 4 };
+    let dragging = false;
+
+    function drawSprite24BitRotateScale(sprite, centerX, centerY, degree, scale) {
+      const radians = degree * Math.PI / 180;
+      const cos = Math.cos(radians);
+      const sin = Math.sin(radians);
+      const spriteCenterX = (sprite[0].length - 1) / 2;
+      const spriteCenterY = (sprite.length - 1) / 2;
+
+      for (let row = 0; row < sprite.length; row++) {
+        for (let col = 0; col < sprite[row].length; col++) {
+          const color = sprite[row][col];
+          if (color === null) continue;
+
+          const localX = (col - spriteCenterX) * scale;
+          const localY = (row - spriteCenterY) * scale;
+          const rotatedX = localX * cos - localY * sin;
+          const rotatedY = localX * sin + localY * cos;
+          const r = (color >> 16) & 255;
+          const g = (color >> 8) & 255;
+          const b = color & 255;
+          drawPixelBlock(centerX + rotatedX, centerY + rotatedY, scale, r, g, b);
+        }
+      }
+    }
+
+    function toCanvasPosition(clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (clientX - rect.left) * canvas.width / rect.width,
+        y: (clientY - rect.top) * canvas.height / rect.height
+      };
+    }
+
+    function updateStatus() {
+      document.getElementById('position').textContent = `X: ${Math.round(state.x)} · Y: ${Math.round(state.y)}`;
+      document.getElementById('rotation').textContent = `Rotation: ${state.degree}°`;
+      document.getElementById('scale').textContent = `Scale: ${state.scale.toFixed(1)}×`;
+    }
+
+    function render() {
+      drawRectFilled(0, 0, canvas.width - 1, canvas.height - 1, 255, 255, 255);
+      drawSprite24BitRotateScale(rocketSprite24Bit, state.x, state.y, state.degree, state.scale);
+      ctx.putImageData(imageData, 0, 0);
+      updateStatus();
+    }
+
+    canvas.addEventListener('pointerdown', event => {
+      dragging = true;
+      canvas.setPointerCapture(event.pointerId);
+      const point = toCanvasPosition(event.clientX, event.clientY);
+      state.x = point.x;
+      state.y = point.y;
+      render();
+    });
+    canvas.addEventListener('pointermove', event => {
+      if (!dragging) return;
+      const point = toCanvasPosition(event.clientX, event.clientY);
+      state.x = point.x;
+      state.y = point.y;
+      render();
+    });
+    canvas.addEventListener('pointerup', () => { dragging = false; });
+
+    window.addEventListener('keydown', event => {
+      const handledKeys = ['w','a','s','d','W','A','S','D','q','Q','e','E','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
+      if (!handledKeys.includes(event.key)) return;
+      event.preventDefault();
+      if (event.key.toLowerCase() === 'w') state.y -= 3;
+      if (event.key.toLowerCase() === 's') state.y += 3;
+      if (event.key.toLowerCase() === 'a') state.x -= 3;
+      if (event.key.toLowerCase() === 'd') state.x += 3;
+      if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'q') state.degree -= 5;
+      if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'e') state.degree += 5;
+      if (event.key === 'ArrowUp') state.scale = Math.min(10, state.scale + 0.5);
+      if (event.key === 'ArrowDown') state.scale = Math.max(1, state.scale - 0.5);
+      render();
+    });
+
+    document.getElementById('reset').addEventListener('click', () => {
+      state = { x: 100, y: 100, degree: 0, scale: 4 };
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paint Canvas</title>
+  <style>
+    :root { --ink:#172033; --muted:#667085; --blue:#3157d5; --pale:#f5f7fb; --line:#dfe3ea; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:28px; color:var(--ink); background:var(--pale); font-family:Inter,system-ui,sans-serif; user-select:none; }
+    .paint-app { width:min(100%,920px); margin:auto; }
+    .heading { margin-bottom:18px; }
+    h1 { margin:0; font-size:clamp(1.6rem,4vw,2.4rem); letter-spacing:-.04em; }
+    .heading p { margin:6px 0 0; color:var(--muted); font-size:.85rem; }
+    .workspace { display:grid; grid-template-columns:150px minmax(0,1fr); gap:12px; }
+    .toolbar,.canvas-wrap,.color-bar { border:1px solid var(--line); border-radius:10px; background:white; }
+    .toolbar { padding:12px; }
+    .tool-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+    button { font:inherit; }
+    .tool-button,.width-button,#clear-canvas { padding:8px 5px; border:1px solid var(--line); border-radius:6px; color:var(--ink); background:var(--pale); cursor:pointer; font-size:.72rem; }
+    .tool-button.active,.width-button.active { color:white; border-color:var(--blue); background:var(--blue); }
+    #clear-canvas { width:100%; margin-top:12px; color:#c43232; background:white; }
+    .panel-label { margin:18px 0 8px; color:var(--muted); font-size:.7rem; font-weight:600; text-transform:uppercase; }
+    .width-options { display:grid; grid-template-columns:repeat(4,1fr); gap:5px; }
+    .width-button { height:36px; display:grid; place-items:center; padding:0; }
+    .width-button span { display:block; width:18px; background:currentColor; }
+    .canvas-wrap { min-width:0; overflow:hidden; }
+    #paint-canvas { display:block; width:100%; height:auto; aspect-ratio:790/520; background:white; cursor:default; touch-action:none; }
+    .color-bar { display:flex; align-items:center; gap:12px; margin-top:12px; padding:12px; }
+    .current { width:38px; height:38px; flex:none; border:3px solid white; border-radius:7px; outline:1px solid var(--line); background:#172033; }
+    .palette { display:flex; flex-wrap:wrap; gap:7px; }
+    .swatch { width:28px; height:28px; padding:0; border:2px solid white; border-radius:6px; outline:1px solid var(--line); cursor:pointer; }
+    .swatch.active { outline:2px solid var(--blue); }
+    .status { margin-left:auto; color:var(--muted); font-size:.75rem; white-space:nowrap; }
+    @media(max-width:650px){body{padding:18px}.workspace{grid-template-columns:1fr}.toolbar{order:2}.tool-grid{grid-template-columns:repeat(5,1fr)}.width-options{max-width:240px}.color-bar{align-items:flex-start}.status{display:none}}
+  </style>
+</head>
+<body>
+  <main class="paint-app">
+    <header class="heading"><h1>Paint Canvas</h1><p>Choose a tool and draw directly on the canvas.</p></header>
+    <div class="workspace">
+      <aside class="toolbar" aria-label="Drawing tools">
+        <div class="tool-grid">
+          <button class="tool-button active" data-tool="pencil">Pencil</button>
+          <button class="tool-button" data-tool="eraser">Eraser</button>
+          <button class="tool-button" data-tool="line">Line</button>
+          <button class="tool-button" data-tool="rectangle">Rect</button>
+          <button class="tool-button" data-tool="ellipse">Ellipse</button>
+        </div>
+        <div class="panel-label">Line width</div>
+        <div class="width-options">
+          <button class="width-button" data-width="1" aria-label="1 pixel"><span style="height:1px"></span></button>
+          <button class="width-button active" data-width="2" aria-label="2 pixels"><span style="height:2px"></span></button>
+          <button class="width-button" data-width="4" aria-label="4 pixels"><span style="height:4px"></span></button>
+          <button class="width-button" data-width="6" aria-label="6 pixels"><span style="height:6px"></span></button>
+          <button class="width-button" data-width="10" aria-label="10 pixels"><span style="height:10px"></span></button>
+          <button class="width-button" data-width="16" aria-label="16 pixels"><span style="height:16px"></span></button>
+          <button class="width-button" data-width="24" aria-label="24 pixels"><span style="height:24px"></span></button>
+        </div>
+        <button id="clear-canvas" type="button">Clear canvas</button>
+      </aside>
+      <div class="canvas-wrap"><canvas id="paint-canvas" width="790" height="520" aria-label="Drawing canvas"></canvas></div>
+    </div>
+    <section class="color-bar" aria-label="Color palette">
+      <span id="current-color" class="current" title="#172033"></span>
+      <div id="palette" class="palette"></div>
+      <span class="status">Tool: <strong id="tool-status">Pencil</strong></span>
+    </section>
+  </main>
+  <script src="../assets/js/paint-demo.js"></script>
+</body>
+</html>

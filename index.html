@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Krittanon Museesut — Computer Science student and web developer">
+  <title>Krittanon Museesut — CV</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav aria-label="Main navigation">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#experience">Experience</a>
+      <a href="#graphics">Graphics</a>
+    </nav>
+    <a class="contact-link" href="mailto:krittanon.mss@gmail.com">Contact</a>
+  </header>
+
+  <main>
+    <section class="hero" id="home">
+      <p class="overline">Computer Science Student</p>
+      <h1>Krittanon<br>Museesut</h1>
+      <p class="intro">I build practical web applications and enjoy turning ideas into simple, useful software.</p>
+      <div class="hero-links">
+        <a href="mailto:krittanon.mss@gmail.com">krittanon.mss@gmail.com</a>
+        <a href="tel:+66800010240">+66 80-001-0240</a>
+        <span>Nakhon Pathom, Thailand</span>
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <h2>About</h2>
+      <div class="section-body">
+        <p class="summary">Computer Science student at Kasetsart University with experience in web development and programming tutoring. Interested in building maintainable web applications and improving through hands-on projects.</p>
+      </div>
+    </section>
+
+    <section class="section" id="experience">
+      <h2>Experience</h2>
+      <div class="section-body timeline">
+        <article>
+          <div class="year">Present</div>
+          <div><h3>Content Tester <span>Part-time</span></h3><p>Review and test digital content for accuracy, consistency, usability, and compliance with specified requirements before publication.</p></div>
+        </article>
+        <article>
+          <div class="year">Present</div>
+          <div>
+            <h3>Software Tester <span>QA &amp; UAT</span></h3>
+            <p>Create and execute test cases, perform QA and UAT, report defects, and verify fixes.</p>
+          </div>
+        </article>
+        <article>
+          <div class="year">Present</div>
+          <div><h3>Internal Express Integration Developer</h3><p>Develop a wrapper application and plugin for a company that uses Express Accounting Software, simplifying internal workflows and making the system easier for employees to use.</p></div>
+        </article>
+        <article>
+          <div class="year">2024 — Present</div>
+          <div><h3>Full-stack Developer</h3><p>Develop and maintain web applications across frontend and backend, integrate APIs, work with databases, and improve application features.</p></div>
+        </article>
+        <article>
+          <div class="year">2024 — 2025</div>
+          <div><h3>Programming Tutor <span>Part-time</span></h3><p>Provide private tutoring in C, Java, and Python programming.</p></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="skills">
+      <h2>Skills</h2>
+      <div class="section-body skill-grid">
+        <div><p class="label">Development</p><p>HTML, CSS, JavaScript, React, Laravel, PHP, Python, Java, C, MySQL, Tailwind CSS</p></div>
+        <div><p class="label">Tools</p><p>Git, GitHub, Jira, Notion, VS Code, XAMPP</p></div>
+        <div><p class="label">Languages</p><p>Thai — Native<br>English — Conversational</p></div>
+        <div><p class="label">Certification</p><p>Coursera: Foundations of UX Design, Build Dynamic User Interfaces</p></div>
+      </div>
+    </section>
+
+    <section class="section graphics" id="graphics">
+      <h2>Interactive Computer Graphics</h2>
+      <div class="section-body">
+        <div class="graphics-intro">
+          <p>Use the controls to translate, rotate, and scale a 24-bit RGB sprite.</p>
+          <button class="reset" id="reset" type="button">Reset image sprite</button>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Graphics demos">
+          <button class="tab active" id="image-tab" role="tab" aria-selected="true" aria-controls="image-panel" data-tab="image-panel">Image Sprite</button>
+          <button class="tab" id="raster-tab" role="tab" aria-selected="false" aria-controls="raster-panel" data-tab="raster-panel">Raster Canvas</button>
+          <button class="tab" id="paint-tab" role="tab" aria-selected="false" aria-controls="paint-panel" data-tab="paint-panel">Paint Canvas</button>
+        </div>
+
+        <div class="tab-panel active" id="image-panel" role="tabpanel" aria-labelledby="image-tab">
+          <div class="playground" id="playground" tabindex="0" aria-label="Interactive image sprite playground">
+            <div class="grid-lines" aria-hidden="true"></div>
+            <img id="sprite" src="assets/images/star-sprite.png" alt="Yellow star in a blue circle, 24-bit RGB sprite">
+            <div class="playground-status"><span id="position">X 0 · Y 0</span><span id="rotation">ROT 0°</span><span id="scale">SCALE 100%</span></div>
+          </div>
+          <div class="controls" aria-label="Sprite controls">
+            <div class="control-group"><span>Move</span><div class="keys"><button data-action="up" aria-label="Move up">↑</button><button data-action="left" aria-label="Move left">←</button><button data-action="down" aria-label="Move down">↓</button><button data-action="right" aria-label="Move right">→</button></div><small>Arrow keys / W A S D</small></div>
+            <div class="control-group"><span>Rotate</span><div class="keys"><button data-action="rotate-left" aria-label="Rotate left">Q</button><button data-action="rotate-right" aria-label="Rotate right">E</button></div><small>Q / E</small></div>
+            <div class="control-group"><span>Scale</span><div class="keys"><button data-action="scale-down" aria-label="Scale down">−</button><button data-action="scale-up" aria-label="Scale up">+</button></div><small>− / +</small></div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="raster-panel" role="tabpanel" aria-labelledby="raster-tab" hidden>
+          <iframe id="raster-frame" src="demos/raster-graphics.html" title="Interactive 24-bit raster canvas demo"></iframe>
+        </div>
+        <div class="tab-panel" id="paint-panel" role="tabpanel" aria-labelledby="paint-tab" hidden>
+          <iframe id="paint-frame" src="demos/paint-demo.html" title="Interactive paint canvas demo"></iframe>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><strong>Krittanon Museesut</strong><a href="mailto:krittanon.mss@gmail.com">krittanon.mss@gmail.com</a><span>© 2026</span></footer>
+  <script src="assets/js/script.js"></script>
+</body>
+</html>
