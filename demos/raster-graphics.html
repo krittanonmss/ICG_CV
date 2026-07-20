@@ -13,8 +13,7 @@
     h1 { margin:0; font-size:clamp(1.8rem,5vw,3.2rem); letter-spacing:-.045em; }
     p { margin:8px 0 0; color:var(--muted); }
     .panel { display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:16px; }
-    canvas { display:block; width:100%; aspect-ratio:1; border:1px solid var(--line); border-radius:12px; background:white; image-rendering:pixelated; cursor:grab; touch-action:none; }
-    canvas:active { cursor:grabbing; }
+    canvas { display:block; width:100%; aspect-ratio:1; border:1px solid var(--line); border-radius:12px; background:white; image-rendering:pixelated; cursor:crosshair; touch-action:none; }
     .controls { padding:20px; border:1px solid var(--line); border-radius:12px; background:white; }
     .controls h2 { margin:0 0 18px; font-size:.9rem; }
     .control { padding:14px 0; border-top:1px solid var(--line); }
@@ -24,7 +23,9 @@
     .status { margin-top:16px; padding:12px; border-radius:8px; background:var(--pale); font:12px/1.8 monospace; }
     button { width:100%; margin-top:16px; padding:9px; border:1px solid var(--blue); border-radius:7px; color:var(--blue); background:white; cursor:pointer; }
     button:hover { color:white; background:var(--blue); }
-    @media(max-width:680px){.top{align-items:start;flex-direction:column}.panel{grid-template-columns:1fr}.controls{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.controls h2,.status,button{grid-column:1/-1}}
+    .scale-buttons { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .scale-buttons button { margin-top:8px; font-size:1.1rem; }
+    @media(max-width:680px){.top{align-items:start;flex-direction:column}.panel{grid-template-columns:1fr}.controls{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.controls h2,.status,.controls>button{grid-column:1/-1}}
   </style>
 </head>
 <body>
@@ -36,8 +37,24 @@
     <div class="panel">
       <canvas id="canvas" width="200" height="200" aria-label="Interactive 24-bit rocket sprite"></canvas>
       <aside class="controls">
-        <h2>Keyboard controls</h2>
-        <div class="status"><div id="position">X: 100 · Y: 100</div></div>
+        <h2>Mouse &amp; keyboard controls</h2>
+        <div class="control">
+          <strong>Move</strong>
+          <small>Move the pointer over the canvas</small>
+        </div>
+        <div class="control">
+          <strong>Scale</strong>
+          <div class="scale-buttons">
+            <button id="scale-down" type="button" aria-label="Scale down">−</button>
+            <button id="scale-up" type="button" aria-label="Scale up">+</button>
+          </div>
+          <small>Keyboard: − / +</small>
+        </div>
+        <div class="status">
+          <div id="position">X: 100 · Y: 100</div>
+          <div id="rotation">Rotation: 0°</div>
+          <div id="scale">Scale: 4.0×</div>
+        </div>
         <button id="reset" type="button">Reset</button>
       </aside>
     </div>
@@ -85,7 +102,6 @@
     ];
 
     let state = { x: 100, y: 100, degree: 0, scale: 4 };
-    let dragging = false;
 
     function drawSprite24BitRotateScale(sprite, centerX, centerY, degree, scale) {
       const radians = degree * Math.PI / 180;
@@ -132,25 +148,15 @@
       updateStatus();
     }
 
-    canvas.addEventListener('pointerdown', event => {
-      dragging = true;
-      canvas.setPointerCapture(event.pointerId);
-      const point = toCanvasPosition(event.clientX, event.clientY);
-      state.x = point.x;
-      state.y = point.y;
-      render();
-    });
     canvas.addEventListener('pointermove', event => {
-      if (!dragging) return;
       const point = toCanvasPosition(event.clientX, event.clientY);
       state.x = point.x;
       state.y = point.y;
       render();
     });
-    canvas.addEventListener('pointerup', () => { dragging = false; });
 
     window.addEventListener('keydown', event => {
-      const handledKeys = ['w','a','s','d','W','A','S','D','q','Q','e','E','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
+      const handledKeys = ['w','a','s','d','W','A','S','D','q','Q','e','E','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-','_'];
       if (!handledKeys.includes(event.key)) return;
       event.preventDefault();
       if (event.key.toLowerCase() === 'w') state.y -= 3;
@@ -161,6 +167,18 @@
       if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'e') state.degree += 5;
       if (event.key === 'ArrowUp') state.scale = Math.min(10, state.scale + 0.5);
       if (event.key === 'ArrowDown') state.scale = Math.max(1, state.scale - 0.5);
+      if (event.key === '+' || event.key === '=') state.scale = Math.min(10, state.scale + 0.5);
+      if (event.key === '-' || event.key === '_') state.scale = Math.max(1, state.scale - 0.5);
+      render();
+    });
+
+    document.getElementById('scale-up').addEventListener('click', () => {
+      state.scale = Math.min(10, state.scale + 0.5);
+      render();
+    });
+
+    document.getElementById('scale-down').addEventListener('click', () => {
+      state.scale = Math.max(1, state.scale - 0.5);
       render();
     });
 
