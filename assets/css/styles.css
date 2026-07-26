@@ -31,12 +31,12 @@ h1 { margin:0; font-size:clamp(3.4rem,9vw,8rem); line-height:.9; letter-spacing:
 .graphics { background:var(--pale); }
 .graphics-intro { display:flex; justify-content:space-between; align-items:center; margin-bottom:22px; }
 .graphics-intro p { margin:0; color:var(--muted); }
-.tabs { display:flex; gap:6px; margin-bottom:12px; padding:5px; width:fit-content; border:1px solid var(--line); border-radius:9px; background:white; }
+.tabs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; padding:5px; width:fit-content; max-width:100%; border:1px solid var(--line); border-radius:9px; background:white; }
 .tab { padding:8px 15px; border:0; border-radius:6px; color:var(--muted); background:transparent; cursor:pointer; font-size:.8rem; font-weight:600; }
 .tab.active { color:white; background:var(--blue); }
 .tab-panel { display:none; }
 .tab-panel.active { display:block; }
-#raster-frame,#paint-frame { display:block; width:100%; height:760px; border:1px solid var(--line); border-radius:12px; background:var(--pale); }
+#raster-frame,#paint-frame,#suzanne-frame { display:block; width:100%; height:760px; border:1px solid var(--line); border-radius:12px; background:var(--pale); }
 .reset { padding:8px 16px; border:1px solid var(--line); border-radius:7px; color:var(--ink); background:white; cursor:pointer; }
 .reset:hover { border-color:var(--blue); color:var(--blue); }
 .playground { position:relative; height:500px; overflow:hidden; border:1px solid var(--line); border-radius:12px; background:white; outline:none; }

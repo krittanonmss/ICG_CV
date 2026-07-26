@@ -90,6 +90,7 @@
           <button class="tab active" id="image-tab" role="tab" aria-selected="true" aria-controls="image-panel" data-tab="image-panel">Image Sprite</button>
           <button class="tab" id="raster-tab" role="tab" aria-selected="false" aria-controls="raster-panel" data-tab="raster-panel">Raster Canvas</button>
           <button class="tab" id="paint-tab" role="tab" aria-selected="false" aria-controls="paint-panel" data-tab="paint-panel">Paint Canvas</button>
+          <button class="tab" id="suzanne-tab" role="tab" aria-selected="false" aria-controls="suzanne-panel" data-tab="suzanne-panel">3D Suzanne</button>
         </div>
 
         <div class="tab-panel active" id="image-panel" role="tabpanel" aria-labelledby="image-tab">
@@ -110,6 +111,9 @@
         </div>
         <div class="tab-panel" id="paint-panel" role="tabpanel" aria-labelledby="paint-tab" hidden>
           <iframe id="paint-frame" src="demos/paint-demo.html" title="Interactive paint canvas demo"></iframe>
+        </div>
+        <div class="tab-panel" id="suzanne-panel" role="tabpanel" aria-labelledby="suzanne-tab" hidden>
+          <iframe id="suzanne-frame" src="demos/suzanne-3d.html" title="Interactive Blender Suzanne WebGL demo"></iframe>
         </div>
       </div>
     </section>

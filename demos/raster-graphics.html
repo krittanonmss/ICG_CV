@@ -13,7 +13,7 @@
     h1 { margin:0; font-size:clamp(1.8rem,5vw,3.2rem); letter-spacing:-.045em; }
     p { margin:8px 0 0; color:var(--muted); }
     .panel { display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:16px; }
-    canvas { display:block; width:100%; aspect-ratio:1; border:1px solid var(--line); border-radius:12px; background:white; image-rendering:pixelated; cursor:crosshair; touch-action:none; }
+    canvas { display:block; width:100%; aspect-ratio:1; border:1px solid var(--line); border-radius:12px; background:white; image-rendering:pixelated; }
     .controls { padding:20px; border:1px solid var(--line); border-radius:12px; background:white; }
     .controls h2 { margin:0 0 18px; font-size:.9rem; }
     .control { padding:14px 0; border-top:1px solid var(--line); }
@@ -23,37 +23,41 @@
     .status { margin-top:16px; padding:12px; border-radius:8px; background:var(--pale); font:12px/1.8 monospace; }
     button { width:100%; margin-top:16px; padding:9px; border:1px solid var(--blue); border-radius:7px; color:var(--blue); background:white; cursor:pointer; }
     button:hover { color:white; background:var(--blue); }
-    .scale-buttons { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-    .scale-buttons button { margin-top:8px; font-size:1.1rem; }
+    .control-buttons { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .control-buttons button { margin-top:8px; font-size:1.1rem; }
     @media(max-width:680px){.top{align-items:start;flex-direction:column}.panel{grid-template-columns:1fr}.controls{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.controls h2,.status,.controls>button{grid-column:1/-1}}
   </style>
 </head>
 <body>
   <main>
     <div class="top">
-      <div><h1>24-bit Raster Graphics</h1><p>A pixel rocket drawn directly into an ImageData buffer.</p></div>
+      <div><h1>24-bit Raster Graphics</h1><p>A 24-bit smile drawn pixel by pixel. Move the pointer over the canvas.</p></div>
     </div>
 
     <div class="panel">
-      <canvas id="canvas" width="200" height="200" aria-label="Interactive 24-bit rocket sprite"></canvas>
+      <canvas id="canvas" width="200" height="200" aria-label="Interactive 24-bit smile sprite"></canvas>
       <aside class="controls">
-        <h2>Mouse &amp; keyboard controls</h2>
-        <div class="control">
-          <strong>Move</strong>
-          <small>Move the pointer over the canvas</small>
-        </div>
+        <h2>Transformation controls</h2>
         <div class="control">
           <strong>Scale</strong>
-          <div class="scale-buttons">
+          <div class="control-buttons">
             <button id="scale-down" type="button" aria-label="Scale down">−</button>
             <button id="scale-up" type="button" aria-label="Scale up">+</button>
           </div>
-          <small>Keyboard: − / +</small>
+          <small>Keyboard: ↑ / ↓ (hold)</small>
+        </div>
+        <div class="control">
+          <strong>Rotate</strong>
+          <div class="control-buttons">
+            <button id="rotate-left" type="button" aria-label="Rotate left">↺</button>
+            <button id="rotate-right" type="button" aria-label="Rotate right">↻</button>
+          </div>
+          <small>Keyboard: ← / → (hold)</small>
         </div>
         <div class="status">
           <div id="position">X: 100 · Y: 100</div>
           <div id="rotation">Rotation: 0°</div>
-          <div id="scale">Scale: 4.0×</div>
+          <div id="scale">Scale: 1.0×</div>
         </div>
         <button id="reset" type="button">Reset</button>
       </aside>
@@ -83,55 +87,78 @@
       }
     }
 
-    function drawPixelBlock(x, y, size, r, g, b) {
-      const radius = Math.max(0, Math.ceil(size / 2) - 1);
-      drawRectFilled(x - radius, y - radius, x + radius, y + radius, r, g, b);
-    }
-
     // Each number is a 24-bit RGB value: 0xRRGGBB. null means transparent.
-    const rocketSprite24Bit = [
-      [null,null,null,0xE8F0FF,0xE8F0FF,null,null,null],
-      [null,null,0xE8F0FF,0xE8F0FF,0xE8F0FF,0xE8F0FF,null,null],
-      [null,null,0x3157D5,0xE8F0FF,0xE8F0FF,0x3157D5,null,null],
-      [null,null,0x3157D5,0x45C2D3,0x45C2D3,0x3157D5,null,null],
-      [null,0x3157D5,0x3157D5,0xE8F0FF,0xE8F0FF,0x3157D5,0x3157D5,null],
-      [0xFF6B4A,0x3157D5,0x3157D5,0xE8F0FF,0xE8F0FF,0x3157D5,0x3157D5,0xFF6B4A],
-      [0xFF6B4A,null,0x3157D5,0x3157D5,0x3157D5,0x3157D5,null,0xFF6B4A],
-      [null,null,0xFFB020,null,null,0xFFB020,null,null],
-      [null,null,0xFF6B4A,null,null,0xFF6B4A,null,null]
+    // Exact 32x32 smile data from 800_Transformation.html, stored as run lengths.
+    const smilePalette = [null,0xC76A08,0xFFDF48,0xFFDE47,0xFFDD45,0xFFDC44,0xFFDA43,0xFFD942,0xFFD841,0xFFD640,0x3B2507,0xFFD53E,0xFFFFFF,0xFFD43D,0xFFD33C,0xFFD13B,0xFFD03A,0xFFCF39,0xFFCD37,0xF58B73,0xFFCC36,0xFFCB35,0xFFC934,0xFFC833,0x7A2E0B,0xFFC732,0xFFC630,0xFFC42F,0xFFC32E,0xFFC22D,0xFFC02C,0xFFBF2B,0xFFBE29,0xFFBD28];
+    const smileRows = [
+      [[0,32]],[[0,12],[1,8],[0,12]],[[0,9],[1,4],[2,6],[1,4],[0,9]],
+      [[0,8],[1,2],[3,12],[1,2],[0,8]],[[0,6],[1,2],[4,16],[1,2],[0,6]],
+      [[0,5],[1,2],[5,18],[1,2],[0,5]],[[0,4],[1,2],[6,20],[1,2],[0,4]],
+      [[0,4],[1,1],[7,22],[1,1],[0,4]],[[0,3],[1,1],[8,24],[1,1],[0,3]],
+      [[0,2],[1,2],[9,5],[10,3],[9,8],[10,3],[9,5],[1,2],[0,2]],
+      [[0,2],[1,1],[11,5],[10,1],[12,1],[10,3],[11,6],[10,1],[12,1],[10,3],[11,5],[1,1],[0,2]],
+      [[0,2],[1,1],[13,5],[10,5],[13,6],[10,5],[13,5],[1,1],[0,2]],
+      [[0,1],[1,2],[14,5],[10,5],[14,6],[10,5],[14,5],[1,2],[0,1]],
+      [[0,1],[1,1],[15,7],[10,3],[15,8],[10,3],[15,7],[1,1],[0,1]],
+      [[0,1],[1,1],[16,28],[1,1],[0,1]],[[0,1],[1,1],[17,28],[1,1],[0,1]],
+      [[0,1],[1,1],[18,5],[19,1],[18,16],[19,1],[18,5],[1,1],[0,1]],
+      [[0,1],[1,1],[20,3],[19,5],[20,12],[19,5],[20,3],[1,1],[0,1]],
+      [[0,1],[1,1],[21,2],[19,7],[21,10],[19,7],[21,2],[1,1],[0,1]],
+      [[0,1],[1,2],[22,2],[19,5],[22,12],[19,5],[22,2],[1,2],[0,1]],
+      [[0,2],[1,1],[23,4],[19,1],[23,1],[24,2],[23,10],[24,2],[23,1],[19,1],[23,4],[1,1],[0,2]],
+      [[0,2],[1,1],[25,6],[24,4],[25,6],[24,4],[25,6],[1,1],[0,2]],
+      [[0,2],[1,2],[26,6],[24,12],[26,6],[1,2],[0,2]],
+      [[0,3],[1,1],[27,7],[24,10],[27,7],[1,1],[0,3]],
+      [[0,4],[1,1],[28,8],[24,6],[28,8],[1,1],[0,4]],
+      [[0,4],[1,2],[29,20],[1,2],[0,4]],[[0,5],[1,2],[30,18],[1,2],[0,5]],
+      [[0,6],[1,2],[31,16],[1,2],[0,6]],[[0,8],[1,2],[32,12],[1,2],[0,8]],
+      [[0,9],[1,4],[33,6],[1,4],[0,9]],[[0,12],[1,8],[0,12]],[[0,32]]
     ];
 
-    let state = { x: 100, y: 100, degree: 0, scale: 4 };
+    function decodeSpriteRows(rows, palette) {
+      return rows.map(row => row.flatMap(([colorIndex, count]) =>
+        Array(count).fill(palette[colorIndex])
+      ));
+    }
 
-    function drawSprite24BitRotateScale(sprite, centerX, centerY, degree, scale) {
+    const smileSprite24Bit = decodeSpriteRows(smileRows, smilePalette);
+
+    let state = { x: 100, y: 100, degree: 0, scale: 1 };
+    let scaling = 0;
+    let rotating = 0;
+
+    // Rotation and scaling are calculated manually for every source pixel.
+    function drawSprite24BitRotateScale(sprite, centerX, centerY, degree, scaleX, scaleY) {
+      const spriteCenterX = sprite[0].length / 2;
+      const spriteCenterY = sprite.length / 2;
       const radians = degree * Math.PI / 180;
       const cos = Math.cos(radians);
       const sin = Math.sin(radians);
-      const spriteCenterX = (sprite[0].length - 1) / 2;
-      const spriteCenterY = (sprite.length - 1) / 2;
 
       for (let row = 0; row < sprite.length; row++) {
         for (let col = 0; col < sprite[row].length; col++) {
           const color = sprite[row][col];
           if (color === null) continue;
 
-          const localX = (col - spriteCenterX) * scale;
-          const localY = (row - spriteCenterY) * scale;
+          const localX = col - spriteCenterX;
+          const localY = row - spriteCenterY;
           const rotatedX = localX * cos - localY * sin;
           const rotatedY = localX * sin + localY * cos;
+          const transformedX = Math.round(rotatedX * scaleX);
+          const transformedY = Math.round(rotatedY * scaleY);
           const r = (color >> 16) & 255;
           const g = (color >> 8) & 255;
           const b = color & 255;
-          drawPixelBlock(centerX + rotatedX, centerY + rotatedY, scale, r, g, b);
+          putPixel(centerX + transformedX, centerY + transformedY, r, g, b);
         }
       }
     }
 
-    function toCanvasPosition(clientX, clientY) {
+    function toScaledMousePos(clientX, clientY) {
       const rect = canvas.getBoundingClientRect();
       return {
-        x: (clientX - rect.left) * canvas.width / rect.width,
-        y: (clientY - rect.top) * canvas.height / rect.height
+        x: Math.floor((clientX - rect.left) * canvas.width / rect.width),
+        y: Math.floor((clientY - rect.top) * canvas.height / rect.height)
       };
     }
 
@@ -143,48 +170,53 @@
 
     function render() {
       drawRectFilled(0, 0, canvas.width - 1, canvas.height - 1, 255, 255, 255);
-      drawSprite24BitRotateScale(rocketSprite24Bit, state.x, state.y, state.degree, state.scale);
+      state.scale = Math.max(0.2, Math.min(4, state.scale + scaling));
+      state.degree += rotating;
+      drawSprite24BitRotateScale(smileSprite24Bit, state.x, state.y, state.degree, state.scale, state.scale);
       ctx.putImageData(imageData, 0, 0);
       updateStatus();
+      requestAnimationFrame(render);
     }
 
     canvas.addEventListener('pointermove', event => {
-      const point = toCanvasPosition(event.clientX, event.clientY);
+      const point = toScaledMousePos(event.clientX, event.clientY);
       state.x = point.x;
       state.y = point.y;
-      render();
     });
 
     window.addEventListener('keydown', event => {
-      const handledKeys = ['w','a','s','d','W','A','S','D','q','Q','e','E','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-','_'];
-      if (!handledKeys.includes(event.key)) return;
+      if (!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)) return;
       event.preventDefault();
-      if (event.key.toLowerCase() === 'w') state.y -= 3;
-      if (event.key.toLowerCase() === 's') state.y += 3;
-      if (event.key.toLowerCase() === 'a') state.x -= 3;
-      if (event.key.toLowerCase() === 'd') state.x += 3;
-      if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'q') state.degree -= 5;
-      if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'e') state.degree += 5;
-      if (event.key === 'ArrowUp') state.scale = Math.min(10, state.scale + 0.5);
-      if (event.key === 'ArrowDown') state.scale = Math.max(1, state.scale - 0.5);
-      if (event.key === '+' || event.key === '=') state.scale = Math.min(10, state.scale + 0.5);
-      if (event.key === '-' || event.key === '_') state.scale = Math.max(1, state.scale - 0.5);
-      render();
+      if (event.key === 'ArrowLeft') rotating = -1;
+      if (event.key === 'ArrowRight') rotating = 1;
+      if (event.key === 'ArrowUp') scaling = 0.02;
+      if (event.key === 'ArrowDown') scaling = -0.02;
+    });
+
+    window.addEventListener('keyup', event => {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') rotating = 0;
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown') scaling = 0;
     });
 
     document.getElementById('scale-up').addEventListener('click', () => {
-      state.scale = Math.min(10, state.scale + 0.5);
-      render();
+      state.scale = Math.min(4, state.scale + 0.1);
     });
 
     document.getElementById('scale-down').addEventListener('click', () => {
-      state.scale = Math.max(1, state.scale - 0.5);
-      render();
+      state.scale = Math.max(0.2, state.scale - 0.1);
+    });
+
+    document.getElementById('rotate-left').addEventListener('click', () => {
+      state.degree -= 5;
+    });
+
+    document.getElementById('rotate-right').addEventListener('click', () => {
+      state.degree += 5;
     });
 
     document.getElementById('reset').addEventListener('click', () => {
-      state = { x: 100, y: 100, degree: 0, scale: 4 };
-      render();
+      state = { x: 100, y: 100, degree: 0, scale: 1 };
+      scaling = rotating = 0;
     });
 
     render();

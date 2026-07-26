@@ -85,10 +85,19 @@ tabs.forEach((tab) => {
     document.querySelector('.graphics-intro p').textContent = tab.dataset.tab === 'image-panel'
       ? 'Use the controls to translate, rotate, and scale a 24-bit RGB image sprite.'
       : tab.dataset.tab === 'raster-panel'
-        ? 'Draw and transform a 24-bit RGB rocket directly on a raster canvas.'
-        : 'Draw freely with pencil, eraser, line, rectangle, and ellipse tools.';
+        ? 'Move, rotate, and scale a 24-bit RGB smile drawn directly on a raster canvas.'
+        : tab.dataset.tab === 'paint-panel'
+          ? 'Draw freely with pencil, eraser, line, rectangle, and ellipse tools.'
+          : 'Rotate and inspect Blender’s Suzanne mesh rendered directly with WebGL.';
     document.querySelector('#reset').hidden = tab.dataset.tab !== 'image-panel';
     if (tab.dataset.tab === 'image-panel') playground.focus({ preventScroll: true });
-    else document.querySelector(tab.dataset.tab === 'raster-panel' ? '#raster-frame' : '#paint-frame').focus();
+    else {
+      const frames = {
+        'raster-panel': '#raster-frame',
+        'paint-panel': '#paint-frame',
+        'suzanne-panel': '#suzanne-frame'
+      };
+      document.querySelector(frames[tab.dataset.tab]).focus();
+    }
   });
 });

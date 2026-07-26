@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Suzanne — WebGL</title>
+  <style>
+    :root { --ink:#172033; --muted:#667085; --blue:#3157d5; --pale:#f5f7fb; --line:#dfe3ea; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:28px; color:var(--ink); background:var(--pale); font-family:Inter,system-ui,sans-serif; }
+    main { width:min(100%,920px); margin:auto; }
+    h1 { margin:0; font-size:clamp(1.6rem,4vw,2.4rem); letter-spacing:-.04em; }
+    header p { margin:6px 0 18px; color:var(--muted); font-size:.85rem; }
+    .stage { position:relative; overflow:hidden; border:1px solid var(--line); border-radius:12px; background:#000; }
+    canvas { display:block; width:100%; height:auto; aspect-ratio:16/9; touch-action:none; cursor:grab; }
+    canvas:active { cursor:grabbing; }
+    .badge { position:absolute; left:14px; bottom:14px; padding:6px 9px; border:1px solid rgba(255,255,255,.2); border-radius:6px; color:#fff; background:rgba(0,0,0,.75); font:11px/1.4 monospace; pointer-events:none; }
+    .controls { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    button { padding:9px 14px; border:1px solid var(--line); border-radius:7px; color:var(--ink); background:white; cursor:pointer; font:inherit; font-size:.78rem; }
+    button:hover { color:white; border-color:var(--blue); background:var(--blue); }
+    .hint { margin:10px 0 0; color:var(--muted); font-size:.75rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <header><h1>3D Suzanne</h1><p>Blender mesh rendered from exported triangle vertices with Three.js.</p></header>
+    <div class="stage">
+      <canvas id="gl-canvas" width="960" height="540" aria-label="Interactive 3D Suzanne model"></canvas>
+      <div class="badge">968 TRIANGLES · 2,904 VERTICES · THREE.JS</div>
+    </div>
+    <div class="controls">
+      <button type="button" data-action="left">Rotate left</button>
+      <button type="button" data-action="right">Rotate right</button>
+      <button type="button" data-action="up">Rotate up</button>
+      <button type="button" data-action="down">Rotate down</button>
+      <button type="button" data-action="zoom-in">Zoom in</button>
+      <button type="button" data-action="zoom-out">Zoom out</button>
+      <button type="button" id="auto-rotate">Pause auto rotate</button>
+      <button type="button" id="reset">Reset</button>
+    </div>
+    <p class="hint">Drag to rotate · Mouse wheel to zoom · Arrow keys rotate · + / − zoom</p>
+  </main>
+  <script src="../assets/js/suzanne-vertices.js"></script>
+  <script type="module" src="../assets/js/suzanne-3d.js"></script>
+</body>
+</html>
