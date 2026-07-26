@@ -12,6 +12,7 @@ nav a:hover { color:var(--blue); }
 .hero { max-width:1200px; min-height:75vh; margin:auto; padding:12vh 5vw 8vh; display:flex; flex-direction:column; justify-content:center; }
 .overline,.label { margin:0 0 16px; color:var(--blue); font-size:.76rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
 h1 { margin:0; font-size:clamp(3.4rem,9vw,8rem); line-height:.9; letter-spacing:-.07em; }
+.student-info { margin:24px 0 0; color:var(--blue); font-size:.9rem; font-weight:600; }
 .intro { max-width:580px; margin:38px 0 26px; color:var(--muted); font-size:1.15rem; }
 .hero-links { display:flex; flex-wrap:wrap; gap:12px 24px; color:var(--muted); font-size:.82rem; }
 .hero-links a { text-underline-offset:3px; }
