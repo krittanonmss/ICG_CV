@@ -56,6 +56,7 @@ The standard Blender Suzanne mesh rendered from exported triangle vertices with 
 │   └── js/
 │       ├── script.js
 │       ├── paint-demo.js
+│       ├── raster-graphics.js
 │       ├── suzanne-3d.js
 │       └── suzanne-vertices.js
 └── demos/
