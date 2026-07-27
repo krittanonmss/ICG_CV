@@ -20,8 +20,6 @@ function drawRectFilled(x1, y1, x2, y2, r, g, b, a = 255) {
   }
 }
 
-// Each number is a 24-bit RGB value: 0xRRGGBB. null means transparent.
-// Exact 32x32 smile data from 800_Transformation.html, stored as run lengths.
 const smilePalette = [null,0xC76A08,0xFFDF48,0xFFDE47,0xFFDD45,0xFFDC44,0xFFDA43,0xFFD942,0xFFD841,0xFFD640,0x3B2507,0xFFD53E,0xFFFFFF,0xFFD43D,0xFFD33C,0xFFD13B,0xFFD03A,0xFFCF39,0xFFCD37,0xF58B73,0xFFCC36,0xFFCB35,0xFFC934,0xFFC833,0x7A2E0B,0xFFC732,0xFFC630,0xFFC42F,0xFFC32E,0xFFC22D,0xFFC02C,0xFFBF2B,0xFFBE29,0xFFBD28];
 const smileRows = [
   [[0,32]],[[0,12],[1,8],[0,12]],[[0,9],[1,4],[2,6],[1,4],[0,9]],
@@ -60,7 +58,6 @@ let state = { x: 100, y: 100, degree: 0, scale: 1 };
 let scaling = 0;
 let rotating = 0;
 
-// Rotation and scaling are calculated manually for every source pixel.
 function drawSprite24BitRotateScale(sprite, centerX, centerY, degree, scaleX, scaleY) {
   const spriteCenterX = sprite[0].length / 2;
   const spriteCenterY = sprite.length / 2;
