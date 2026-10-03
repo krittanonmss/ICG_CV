@@ -1,0 +1,15 @@
+.index-page, .model-page { padding-top: 68px; }
+.index-page .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px; margin-top: 20px; }
+.index-page .grid .card { display: flex; flex-direction: column; gap: 8px; padding: 20px; border: 1px solid #d9d9df; border-radius: 8px; background: #f4f2ee; color: #343b50; text-decoration: none; font-weight: 600; }
+.index-page .grid .card small { margin-left: 0; font-weight: 400; line-height: 1.5; }
+.index-page .grid .card:hover { background: #e9e7e3; border-color: #a0a2ab; }
+.index-page .grid .card:focus-visible { outline: 2px solid #343b50; outline-offset: 3px; }
+.back-button { position: fixed; top: 14px; left: 14px; z-index: 3; display: grid; place-items: center; box-sizing: border-box; width: 42px; height: 42px; border: 1px solid rgba(45,50,65,.14); border-radius: 50%; background: rgba(255,255,255,.86); color: #343b50; box-shadow: 0 2px 10px rgba(0,0,0,.1); text-decoration: none; }
+.back-button svg { width: 22px; height: 22px; }
+.back-button:hover { background: #f4f2ee; }
+.back-button:focus-visible { outline: 2px solid #343b50; outline-offset: 2px; }
+.lighting-demo .stage canvas { height: min(540px, calc((100vw - 40px) * 9 / 16), calc(100dvh - 220px)); touch-action: none; }
+.lighting-demo .demo-nav { position: static; margin-top: 10px; }
+.lighting-demo .demo-links { gap: 5px; }
+.lighting-demo .demo-links a { background: #ddd; color: #222; text-decoration: none; padding: 5px 9px; }
+.lighting-demo .demo-links a:hover { background: #ccc; }

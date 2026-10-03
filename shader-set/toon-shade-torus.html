@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Toon Shade · Torus</title>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="../simple-orbit-controls.js"></script>
+  <script src="scene-layout.js"></script>
+  <link rel="stylesheet" href="../layout.css">
+  <link rel="stylesheet" href="shaders.css">
+</head>
+<body class="model-page shader-demo">
+<main><a class="back-button" href="index.html" aria-label="กลับ Shader Studies" title="กลับ Shader Studies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 5-7 7 7 7M3 12h18"/></svg></a><h1>Toon Shade Torus</h1><div class="stage" id="shader-stage"></div><nav class="demo-nav"><div class="demo-links"><a href="outline.html">Outline</a><a href="object-list.html">Object List</a><a href="picking-lerp.html">Picking &amp; Lerp</a></div></nav><p class="hint">Drag to orbit · Mouse wheel to zoom</p></main>
+
+
+<script>
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x111111);
+  const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 2.8);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  
+  document.querySelector("#shader-stage").appendChild(renderer.domElement);
+  bindShaderViewport(renderer, camera);
+  const controls = new SimpleOrbitControls(camera, renderer.domElement);
+
+  const uniforms = {
+    uTexture: { value: new THREE.TextureLoader().load('https://threejs.org/examples/textures/uv_grid_opengl.jpg') },
+    uLightDir: { value: new THREE.Vector3(0.5, 1.0, 0.8).normalize() }
+  };
+  const vertexShader = `
+    varying vec3 vNormal;
+    varying vec3 vWorldPosition;
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      vNormal = normalize(mat3(modelMatrix) * normal);
+      vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+      vWorldPosition = worldPosition.xyz;
+      gl_Position = projectionMatrix * viewMatrix * worldPosition;
+    }
+  `;
+  const fragmentShader = `
+    uniform sampler2D uTexture;
+    uniform vec3 uLightDir;
+    varying vec3 vNormal, vWorldPosition;
+    varying vec2 vUv;
+    void main() {
+      vec3 N = normalize(vNormal);
+      vec3 L = normalize(uLightDir);
+      vec3 V = normalize(cameraPosition - vWorldPosition);
+      float diffuse = max(dot(N, L), 0.0);
+      // แบ่งแสงเป็น 4 ระดับ จึงเกิดลาย toon/cel shade ที่ขอบชัด
+      float toon = diffuse < .20 ? .20 : diffuse < .45 ? .43 : diffuse < .72 ? .70 : 1.0;
+      // UV grid เดียวกับไฟล์ updated_color_only มีเส้นตารางและตัวเลข
+      vec3 base = texture2D(uTexture, vUv).rgb * vec3(1.0, 0.45, 0.75);
+      float highlight = step(.94, pow(max(dot(reflect(-L, N), V), 0.0), 32.0));
+      gl_FragColor = vec4(base * toon + vec3(highlight) * .20, 1.0);
+    }
+  `;
+  const material = new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms });
+  const mesh = new THREE.Mesh(new THREE.TorusKnotBufferGeometry(0.52, 0.2, 96, 16), material);
+  scene.add(mesh);
+
+  
+  function animate() { controls.update(); renderer.render(scene, camera); requestAnimationFrame(animate); }
+  animate();
+</script>
+</body>
+</html>

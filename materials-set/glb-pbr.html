@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLB PBR</title>
+  <link rel="stylesheet" href="../layout.css">
+  <link rel="stylesheet" href="materials.css">
+</head>
+<body class="model-page material-demo">
+    <main><a class="back-button" href="index.html" title="กลับ Material Studies" aria-label="กลับ Material Studies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 5-7 7 7 7M3 12h18"/></svg></a>
+<h1>GLB PBR</h1>
+<div class="stage" id="material-stage"></div>
+<nav class="demo-nav"><div class="demo-links"><a href="classic-materials.html?material=basic">Basic / Lambert / Phong / PBR</a><a href="application-pbr.html">Application PBR</a><a href="pbr-raytracing.html">PBR + Raytracing</a></div></nav>
+<p class="hint">Drag to orbit · Mouse wheel to zoom</p></main>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/fflate.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/EXRLoader.js"></script>
+    <script src="../simple-orbit-controls.js"></script>
+    <script src="scene-layout.js"></script>
+    <script>
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.0;
+        document.querySelector("#material-stage").appendChild(renderer.domElement);
+
+        const scene = new THREE.Scene();
+
+        const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 3.2, 7);
+        camera.lookAt(0, 0.8, 0);
+
+        bindMaterialViewport(renderer, camera);
+        const controls = new SimpleOrbitControls(camera, renderer.domElement);
+        controls.target.set(0, 0.8, 0);
+        controls.update();
+
+        const pmremGenerator = new THREE.PMREMGenerator(renderer);
+        pmremGenerator.compileEquirectangularShader();
+        new THREE.EXRLoader()
+            .setDataType(THREE.UnsignedByteType)
+            .load('https://dl.polyhaven.org/file/ph-assets/HDRIs/exr/1k/venice_sunset_1k.exr', (texture) => {
+                const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+                scene.background = envMap;
+                scene.environment = envMap;
+                texture.dispose();
+                pmremGenerator.dispose();
+            });
+
+        scene.add(new THREE.HemisphereLight(0xffffff, 0x222831, 0.55));
+
+        const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
+        keyLight.position.set(-4, 7, 3);
+        keyLight.castShadow = true;
+        keyLight.shadow.mapSize.set(2048, 2048);
+        keyLight.shadow.camera.left = -7;
+        keyLight.shadow.camera.right = 7;
+        keyLight.shadow.camera.top = 7;
+        keyLight.shadow.camera.bottom = -7;
+        scene.add(keyLight);
+
+        const textureLoader = new THREE.TextureLoader();
+        const floorTexture = textureLoader.load('https://sibsansuk.github.io/mossy_cobblestone_diff_1k.jpg');
+        floorTexture.wrapS = THREE.RepeatWrapping;
+        floorTexture.wrapT = THREE.RepeatWrapping;
+        floorTexture.repeat.set(4, 4);
+        const floor = new THREE.Mesh(
+            new THREE.PlaneGeometry(12, 12),
+            new THREE.MeshStandardMaterial({
+                map: floorTexture,
+                roughness: 0.5,
+                metalness: 0.0
+            })
+        );
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        const sphereGeometry = new THREE.SphereGeometry(0.42, 64, 64);
+        const materials = [
+            new THREE.MeshStandardMaterial({ color: 0xff2f6d, roughness: 0.35, metalness: 0.0 }),
+            new THREE.MeshStandardMaterial({ color: 0xffc857, roughness: 0.26, metalness: 0.0 }),
+            new THREE.MeshStandardMaterial({ color: 0x00b8a9, roughness: 0.22, metalness: 0.0 }),
+            new THREE.MeshStandardMaterial({ color: 0xe6e8f0, roughness: 0.11, metalness: 0.95 }),
+            new THREE.MeshStandardMaterial({ color: 0x6a4c93, roughness: 0.06, metalness: 1.0 }),
+            new THREE.MeshStandardMaterial({ color: 0x95d5b2, roughness: 0.08, metalness: 1.0 })
+        ];
+
+        const positions = [
+            [-2.4, 0.42, -0.7],
+            [-1.1, 0.42, -1.55],
+            [0.25, 0.42, -0.9],
+            [-1.75, 0.42, 0.75],
+            [-0.25, 0.42, 0.25],
+            [1.15, 0.42, -0.1]
+        ];
+
+        positions.forEach((position, index) => {
+            const sphere = new THREE.Mesh(sphereGeometry, materials[index]);
+            sphere.position.set(position[0], position[1], position[2]);
+            sphere.castShadow = true;
+            sphere.receiveShadow = true;
+            scene.add(sphere);
+        });
+
+        const loader = new THREE.GLTFLoader();
+        loader.load('https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Assets@main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', (gltf) => {
+            const helmet = gltf.scene;
+            helmet.position.set(1.95, 0.5, 0.85);
+            helmet.scale.set(0.65, 0.65, 0.65);
+            helmet.rotation.y = -0.55;
+            helmet.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            });
+            scene.add(helmet);
+        });
+
+        function animate() {
+            controls.update();
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        
+    </script>
+</body>
+</html>

@@ -1,87 +1,27 @@
-# Interactive Computer Graphics CV
+# Portfolio GitHub Pages site
 
-A responsive personal CV containing four interactive computer graphics demonstrations. The project runs directly in the browser with HTML, CSS, and JavaScript and does not require a build step.
+`index.html` is the full-screen 3D Portfolio Room and the home page of this static site. The three buttons in its top-right corner switch day/night lighting, zoom to the nine clickable project books, and download the Blender model. The former `portfolio-room/index.html` URL redirects back to the home page so older links still work.
 
-## Graphics demonstrations
+| Path | Page |
+| --- | --- |
+| `index.html` | Interactive 3D Portfolio Room |
+| `paint-canvas/index.html` | Paint Canvas |
+| `raster-canvas/index.html` | Raster Canvas |
+| `model-studies/index.html` | Model Studies menu (third book, after Raster) |
+| `suzanne-3d/index.html` | 3D Suzanne |
+| `bent-plywood-chair/index.html` | Bent Plywood Chair |
+| `lighting-set/index.html` | Lighting Studies menu |
+| `materials-set/index.html` | Material Studies menu |
+| `shader-set/index.html` | Shader Studies menu |
+| `obj-loader/index.html` | OBJ Loader |
+| `vertex-color/index.html` | Vertex Color + Blender source |
+| `vertex-color-web/index.html` | VertexColor Web |
+| `vertex-uv-texture/index.html` | Vertex + UV + Tex |
 
-### Image Sprite
+The Lighting, Materials, and Shader menus link to their individual demonstrations. Every project page links back to the room. The room model, embedded GLB copy for local-file access, Blender source, and font live in `portfolio-room/`; shared page styles and orbit controls live at the site root.
 
-A 24-bit PNG sprite transformed with CSS.
+Publish the **contents** of this directory at the root of a GitHub Pages site. The site needs no build step. For a local preview, run `python3 -m http.server 8000 --directory github-pages` from the parent directory and open `http://localhost:8000/`. Three.js and some project assets load from external CDNs and require an internet connection.
 
-- Move with the arrow keys or `W` `A` `S` `D`
-- Rotate with `Q` / `E`
-- Scale with `-` / `+`
-- Use the on-screen controls on mouse and touch devices
+The four model studies use a credited Low Poly Fox from Sketchfab via the Khronos asset mirror. Source, OBJ, vertex-colored Blender/PLY files, texture, embedded data for file access and rebuild script are in `model-studies/`. See `model-studies/CREDITS.md`.
 
-### Raster Canvas
-
-A 32 × 32 smile sprite drawn directly into an `ImageData` RGBA buffer.
-
-- Move the pointer over the canvas to position the sprite
-- Hold `←` / `→` to rotate
-- Hold `↑` / `↓` to scale
-- Rotation, scaling, pixel placement, and sprite decoding are implemented in JavaScript
-
-### Paint Canvas
-
-A raster paint program that writes every result into an `ImageData` buffer without Canvas path-drawing functions or external libraries.
-
-- Pencil and eraser tools
-- Line, rectangle, and ellipse tools
-- Color palette and selectable brush widths
-- Clear canvas control
-- Bresenham line and midpoint ellipse algorithms
-
-### 3D Suzanne
-
-The standard Blender Suzanne mesh rendered from exported triangle vertices with Three.js.
-
-- 968 triangles and 2,904 vertices
-- White `MeshStandardMaterial` with directional lighting
-- Automatic rotation with pause/play control
-- Drag or use the arrow keys to rotate
-- Scroll, `+`, `-`, or the on-screen controls to zoom
-- Reset control
-
-## Project structure
-
-```text
-.
-├── index.html
-├── assets/
-│   ├── css/
-│   │   └── styles.css
-│   ├── images/
-│   │   └── star-sprite.png
-│   └── js/
-│       ├── script.js
-│       ├── paint-demo.js
-│       ├── raster-graphics.js
-│       ├── suzanne-3d.js
-│       └── suzanne-vertices.js
-└── demos/
-    ├── paint-demo.html
-    ├── raster-graphics.html
-    └── suzanne-3d.html
-```
-
-## Running locally
-
-Serve the project directory with any static HTTP server, then open `index.html`. An HTTP server is required for the ES module used by the Three.js demonstration.
-
-For example:
-
-```bash
-python3 -m http.server 8000
-```
-
-Then open `http://localhost:8000`.
-
-## GitHub Pages
-
-1. Open the repository's **Settings → Pages**.
-2. Under **Build and deployment**, select **Deploy from a branch**.
-3. Select the `main` branch and `/ (root)` directory.
-4. Save the configuration.
-
-The site has no build step. Three.js is loaded as a pinned ES module from jsDelivr.
+`room-showcase/index.html` shows the Blender room with orbit/zoom controls. Material Studies includes `character-pbr.html`, an original Blender-modeled metallic robot character with a studio reflection environment and metalness/roughness controls.

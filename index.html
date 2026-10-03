@@ -1,126 +1,693 @@
 <!doctype html>
-<html lang="en">
+<html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Krittanon Museesut — Computer Science student and web developer">
-  <title>Krittanon Museesut — CV</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3D Portfolio Room</title>
+  <link rel="stylesheet" href="layout.css">
+  <style>
+    .room-home-page { height: 100vh; height: 100dvh; overflow: hidden; }
+    .room-home-page main, .room-home-page .stage { width: 100%; height: 100%; }
+    .room-home-page #room-canvas { height: 100%; min-height: 0; }
+    .visually-hidden {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1px;
+      height: 1px;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .book-tooltip {
+      position: absolute;
+      z-index: 2;
+      box-sizing: border-box;
+      max-width: calc(100% - 16px);
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(29, 31, 43, 0.94);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .scene-icon-button {
+      position: absolute;
+      right: 14px;
+      z-index: 3;
+      display: grid;
+      place-items: center;
+      box-sizing: border-box;
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      border: 1px solid rgba(45, 50, 65, 0.14);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.86);
+      color: #343b50;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .light-toggle { top: 14px; }
+    .books-toggle { top: 64px; }
+    .model-download { top: 114px; }
+    .scene-icon-button:hover { background: white; }
+    .scene-icon-button:focus-visible { outline: 2px solid #343b50; outline-offset: 2px; }
+    .scene-icon-button[hidden] { display: none; }
+    .scene-icon-button svg { width: 22px; height: 22px; }
+    .scene-icon-button svg[hidden] { display: none; }
+    .frame-toggle { position: absolute; z-index: 3; transform: translate(-50%, -50%); padding: 4px 9px; border: 1px solid rgba(45,50,65,.25); border-radius: 12px; background: rgba(255,255,255,.94); color: #343b50; font-size: 11px; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+    .frame-toggle:hover { background: #eae8e4; }
+    .frame-toggle:focus-visible { outline: 2px solid #343b50; outline-offset: 2px; }
+      .resume-dialog { width: min(960px, 94vw); height: 90dvh; padding: 0; border: 0; border-radius: 16px; background: #f4f2ee; color: #343b50; }
+    .resume-dialog::backdrop { background: rgba(20, 25, 35, .65); }
+    .resume-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; height: 60px; }
+    .resume-header a { color: inherit; }
+    .resume-close { width: 34px; height: 34px; border: 1px solid #ddd; border-radius: 50%; background: white; cursor: pointer; font-size: 22px; }
+    .resume-dialog iframe { display: block; width: 100%; height: calc(100% - 60px); border: 0; background: white; }
+  </style>
 </head>
-<body>
-  <header class="site-header">
-    <nav aria-label="Main navigation">
-      <a href="#home">Home</a>
-      <a href="#about">About</a>
-      <a href="#experience">Experience</a>
-      <a href="#graphics">Graphics</a>
-    </nav>
-    <a class="contact-link" href="mailto:krittanon.mss@gmail.com">Contact</a>
-  </header>
-
+<body class="room-home-page">
   <main>
-    <section class="hero" id="home">
-      <p class="overline">Computer Science Student</p>
-      <h1>Krittanon<br>Museesut</h1>
-      <p class="student-info">6621650213 กฤตานน มุสีสุทธิ์ sec800</p>
-      <p class="intro">I build practical web applications and enjoy turning ideas into simple, useful software.</p>
-      <div class="hero-links">
-        <a href="mailto:krittanon.mss@gmail.com">krittanon.mss@gmail.com</a>
-        <a href="tel:+66800010240">+66 80-001-0240</a>
-        <span>Nakhon Pathom, Thailand</span>
-      </div>
-    </section>
-
-    <section class="section" id="about">
-      <h2>About</h2>
-      <div class="section-body">
-        <p class="summary">Computer Science student at Kasetsart University with experience in web development and programming tutoring. Interested in building maintainable web applications and improving through hands-on projects.</p>
-      </div>
-    </section>
-
-    <section class="section" id="experience">
-      <h2>Experience</h2>
-      <div class="section-body timeline">
-        <article>
-          <div class="year">Present</div>
-          <div><h3>Content Tester <span>Part-time</span></h3><p>Review and test digital content for accuracy, consistency, usability, and compliance with specified requirements before publication.</p></div>
-        </article>
-        <article>
-          <div class="year">Present</div>
-          <div>
-            <h3>Software Tester <span>QA &amp; UAT</span></h3>
-            <p>Create and execute test cases, perform QA and UAT, report defects, and verify fixes.</p>
-          </div>
-        </article>
-        <article>
-          <div class="year">Present</div>
-          <div><h3>Internal Express Integration Developer</h3><p>Develop a wrapper application and plugin for a company that uses Express Accounting Software, simplifying internal workflows and making the system easier for employees to use.</p></div>
-        </article>
-        <article>
-          <div class="year">2024 — Present</div>
-          <div><h3>Full-stack Developer</h3><p>Develop and maintain web applications across frontend and backend, integrate APIs, work with databases, and improve application features.</p></div>
-        </article>
-        <article>
-          <div class="year">2024 — 2025</div>
-          <div><h3>Programming Tutor <span>Part-time</span></h3><p>Provide private tutoring in C, Java, and Python programming.</p></div>
-        </article>
-      </div>
-    </section>
-
-    <section class="section" id="skills">
-      <h2>Skills</h2>
-      <div class="section-body skill-grid">
-        <div><p class="label">Development</p><p>HTML, CSS, JavaScript, React, Laravel, PHP, Python, Java, C, MySQL, Tailwind CSS</p></div>
-        <div><p class="label">Tools</p><p>Git, GitHub, Jira, Notion, VS Code, XAMPP</p></div>
-        <div><p class="label">Languages</p><p>Thai — Native<br>English — Conversational</p></div>
-        <div><p class="label">Certification</p><p>Coursera: Foundations of UX Design, Build Dynamic User Interfaces</p></div>
-      </div>
-    </section>
-
-    <section class="section graphics" id="graphics">
-      <h2>Interactive Computer Graphics</h2>
-      <div class="section-body">
-        <div class="graphics-intro">
-          <p>Use the controls to translate, rotate, and scale a 24-bit RGB sprite.</p>
-          <button class="reset" id="reset" type="button">Reset image sprite</button>
-        </div>
-        <div class="tabs" role="tablist" aria-label="Graphics demos">
-          <button class="tab active" id="image-tab" role="tab" aria-selected="true" aria-controls="image-panel" data-tab="image-panel">Image Sprite</button>
-          <button class="tab" id="raster-tab" role="tab" aria-selected="false" aria-controls="raster-panel" data-tab="raster-panel">Raster Canvas</button>
-          <button class="tab" id="paint-tab" role="tab" aria-selected="false" aria-controls="paint-panel" data-tab="paint-panel">Paint Canvas</button>
-          <button class="tab" id="suzanne-tab" role="tab" aria-selected="false" aria-controls="suzanne-panel" data-tab="suzanne-panel">3D Suzanne</button>
-        </div>
-
-        <div class="tab-panel active" id="image-panel" role="tabpanel" aria-labelledby="image-tab">
-          <div class="playground" id="playground" tabindex="0" aria-label="Interactive image sprite playground">
-            <div class="grid-lines" aria-hidden="true"></div>
-            <img id="sprite" src="assets/images/star-sprite.png" alt="Yellow star in a blue circle, 24-bit RGB sprite">
-            <div class="playground-status"><span id="position">X 0 · Y 0</span><span id="rotation">ROT 0°</span><span id="scale">SCALE 100%</span></div>
-          </div>
-          <div class="controls" aria-label="Sprite controls">
-            <div class="control-group"><span>Move</span><div class="keys"><button data-action="up" aria-label="Move up">↑</button><button data-action="left" aria-label="Move left">←</button><button data-action="down" aria-label="Move down">↓</button><button data-action="right" aria-label="Move right">→</button></div><small>Arrow keys / W A S D</small></div>
-            <div class="control-group"><span>Rotate</span><div class="keys"><button data-action="rotate-left" aria-label="Rotate left">Q</button><button data-action="rotate-right" aria-label="Rotate right">E</button></div><small>Q / E</small></div>
-            <div class="control-group"><span>Scale</span><div class="keys"><button data-action="scale-down" aria-label="Scale down">−</button><button data-action="scale-up" aria-label="Scale up">+</button></div><small>− / +</small></div>
-          </div>
-        </div>
-
-        <div class="tab-panel" id="raster-panel" role="tabpanel" aria-labelledby="raster-tab" hidden>
-          <iframe id="raster-frame" src="demos/raster-graphics.html" title="Interactive 24-bit raster canvas demo"></iframe>
-        </div>
-        <div class="tab-panel" id="paint-panel" role="tabpanel" aria-labelledby="paint-tab" hidden>
-          <iframe id="paint-frame" src="demos/paint-demo.html" title="Interactive paint canvas demo"></iframe>
-        </div>
-        <div class="tab-panel" id="suzanne-panel" role="tabpanel" aria-labelledby="suzanne-tab" hidden>
-          <iframe id="suzanne-frame" src="demos/suzanne-3d.html" title="Interactive Blender Suzanne WebGL demo"></iframe>
-        </div>
-      </div>
-    </section>
+    <div class="stage">
+      <canvas id="room-canvas" aria-label="ห้อง 3D ที่ลากหมุน ซูม คลิกหนังสือ 10 เล่มบนชั้นเหนือเตียงเพื่อเปิดโปรเจกต์ คลิกกรอบรูปเพื่ออ่านข้อความ และคลิกรีโมทแอร์ข้างหัวเตียงได้"></canvas>
+      <div id="book-tooltip" class="book-tooltip" role="tooltip" hidden></div>
+      <button id="frame-toggle" class="frame-toggle" type="button" hidden>ดูรูป</button>
+      <button id="light-toggle" class="scene-icon-button light-toggle" type="button" aria-label="เปลี่ยนเป็นโหมดกลางคืน" title="เปลี่ยนเป็นโหมดกลางคืน">
+        <svg id="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+        </svg>
+        <svg id="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
+          <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5 8.5 8.5 0 1 0 20.5 14.5Z"></path>
+        </svg>
+      </button>
+      <button id="books-view" class="scene-icon-button books-toggle" type="button" aria-label="ซูมไปที่ชั้นหนังสือ" aria-pressed="false" title="ซูมไปที่ชั้นหนังสือ">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 6.5C9.8 5.2 6.6 4.8 3 5.3v12.6c3.6-.5 6.8-.1 9 1.2 2.2-1.3 5.4-1.7 9-1.2V5.3c-3.6-.5-6.8-.1-9 1.2Z"></path>
+          <path d="M12 6.5v12.6"></path>
+        </svg>
+      </button>
+      <a id="model-download" class="scene-icon-button model-download" href="portfolio-room/portfolio_room.blend" download="portfolio_room.blend" aria-label="ดาวน์โหลดโมเดล Blender" title="ดาวน์โหลดโมเดล Blender (.blend)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2.5 4.5 6.8v8.4l7.5 4.3 7.5-4.3V6.8L12 2.5Z"></path>
+          <path d="M4.5 6.8 12 11l7.5-4.2M12 11v8.5"></path>
+        </svg>
+      </a>
+      <p id="status" class="visually-hidden" aria-live="polite">ลากหมุน ซูม และกดหนังสือเพื่อเปิดโปรเจกต์</p>
+    </div>
   </main>
+  <dialog id="resume-dialog" class="resume-dialog" aria-labelledby="resume-title">
+    <div class="resume-header"><strong id="resume-title">Resume</strong><a href="resume/krittanon_resume_TH.pdf" target="_blank" rel="noopener">เปิด PDF</a><button id="resume-close" class="resume-close" type="button" aria-label="ปิด Resume">×</button></div>
+    <iframe id="resume-pdf" title="เรซูเม่ กฤตานน มุสีสุทธิ์"></iframe>
+  </dialog>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="simple-orbit-controls.js?v=2"></script>
+  <script src="portfolio-room/model-data.js"></script>
+  <script>
+    const resumeDialog = document.getElementById('resume-dialog');
+    document.getElementById('resume-close').addEventListener('click', () => resumeDialog.close());
+    resumeDialog.addEventListener('click', event => {
+      const rect = resumeDialog.getBoundingClientRect();
+      if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) resumeDialog.close();
+    });
+    resumeDialog.addEventListener('close', () => canvas.focus());
+    const canvas = document.getElementById('room-canvas');
+    canvas.tabIndex = 0;
+    const bookTooltip = document.getElementById('book-tooltip');
+    const status = document.getElementById('status');
+    const lightButton = document.getElementById('light-toggle');
+    const sunIcon = document.getElementById('sun-icon');
+    const moonIcon = document.getElementById('moon-icon');
+    const booksButton = document.getElementById('books-view');
+    const frameToggle = document.getElementById('frame-toggle');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 0.9;
+    renderer.shadowMap.enabled = true;
 
-  <footer><strong>Krittanon Museesut</strong><a href="mailto:krittanon.mss@gmail.com">krittanon.mss@gmail.com</a><span>© 2026</span></footer>
-  <script src="assets/js/script.js"></script>
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf4f2ee);
+    const ambient = new THREE.HemisphereLight(0xffffff, 0xbab1aa, 0.75);
+    scene.add(ambient);
+    const sun = new THREE.DirectionalLight(0xffffff, 0.75);
+    sun.position.set(4, 8, 6);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(1024, 1024);
+    sun.shadow.camera.left = -6;
+    sun.shadow.camera.right = 6;
+    sun.shadow.camera.top = 6;
+    sun.shadow.camera.bottom = -6;
+    sun.shadow.normalBias = 0.02;
+    scene.add(sun);
+    const roomFill = new THREE.PointLight(0xffd6ae, 0.25, 9, 2);
+    roomFill.position.set(-1, 3.1, 0.2);
+    scene.add(roomFill);
+
+    // A soft transparent halo extends beyond the monitor, while a real light
+    // illuminates the desk and chair in front of the screen.
+    const screenGlowMaterial = new THREE.ShaderMaterial({
+      uniforms: { uStrength: { value: 0.38 } },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uStrength;
+        varying vec2 vUv;
+        void main() {
+          float distanceFromCenter = length((vUv - 0.5) * vec2(1.0, 1.3));
+          float halo = 1.0 - smoothstep(0.1, 0.65, distanceFromCenter);
+          gl_FragColor = vec4(0.62, 0.83, 1.0, halo * uStrength);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    });
+
+    // A small studio environment supplies reflections for the imported metalness/roughness material.
+    const reflectionScene = new THREE.Scene();
+    reflectionScene.background = new THREE.Color(0x7d8796);
+    function reflectionPanel(color, width, height, x, y, z) {
+      const panel = new THREE.Mesh(
+        new THREE.PlaneGeometry(width, height),
+        new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide })
+      );
+      panel.position.set(x, y, z);
+      panel.lookAt(0, 0, 0);
+      reflectionScene.add(panel);
+    }
+    reflectionPanel(0xffffff, 3.2, 4.5, -3, 3, 2);
+    reflectionPanel(0xe7f1ff, 2.4, 3.2, 4, 2, -1);
+    reflectionPanel(0xffd6b3, 1.8, 2.8, 0, 4, -3);
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const reflectionTarget = pmrem.fromScene(reflectionScene, 0.05);
+    scene.environment = reflectionTarget.texture;
+    pmrem.dispose();
+
+    let nightMode = false;
+    function updateLighting() {
+      scene.background.setHex(nightMode ? 0x343b50 : 0xf4f2ee);
+      ambient.color.setHex(nightMode ? 0xb4c9ef : 0xffffff);
+      ambient.groundColor.setHex(nightMode ? 0x47445b : 0xbab1aa);
+      ambient.intensity = nightMode ? 0.22 : 0.75;
+      sun.color.setHex(nightMode ? 0xa9c7f9 : 0xffffff);
+      sun.intensity = nightMode ? 0.12 : 0.75;
+      roomFill.intensity = nightMode ? 0.95 : 0.25;
+      screenGlowMaterial.uniforms.uStrength.value = nightMode ? 0.75 : 0.38;
+      if (monitorSpill) monitorSpill.intensity = nightMode ? 2.8 : 1.1;
+      if (laptopSpill) laptopSpill.intensity = nightMode ? 0.65 : 0.25;
+      plantLightLevel.value = nightMode ? 0.55 : 1;
+      if (pbrSphere) pbrSphere.material.envMapIntensity = nightMode ? 0.45 : 1.2;
+      sunIcon.toggleAttribute('hidden', nightMode);
+      moonIcon.toggleAttribute('hidden', !nightMode);
+      const label = `เปลี่ยนเป็นโหมด${nightMode ? 'กลางวัน' : 'กลางคืน'}`;
+      lightButton.setAttribute('aria-label', label);
+      lightButton.title = label;
+    }
+    lightButton.addEventListener('click', () => { nightMode = !nightMode; updateLighting(); });
+
+    const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
+    camera.position.set(-10, 9, 12);
+    const controls = new SimpleOrbitControls(camera, canvas);
+    controls.target.set(0, 1.5, 0);
+    controls.update();
+    controls.zoomToCursor = false;
+    controls.enableTouchGestures = true;
+    controls.minDistance = 0.35;
+    controls.maxDistance = 60;
+    const projects = [
+      { title: 'Paint Canvas', href: 'paint-canvas/index.html' },
+      { title: 'Raster Canvas', href: 'raster-canvas/index.html' },
+      { title: 'Model Studies', href: 'model-studies/index.html' },
+      { title: '3D Suzanne', href: 'suzanne-3d/index.html' },
+      { title: 'Bent Plywood Chair', href: 'bent-plywood-chair/index.html' },
+      { title: 'Lighting Studies', href: 'lighting-set/index.html' },
+      { title: 'Material Studies', href: 'materials-set/index.html' },
+      { title: 'Shader Studies', href: 'shader-set/index.html' },
+      { title: 'Room Portfolio', href: 'room-showcase/index.html' },
+      { title: 'Resume · กฤตานน มุสีสุทธิ์', href: 'resume/krittanon_resume_TH.pdf', popup: true }
+    ];
+    const roomControlsHint = 'ลากหมุน · หมุนล้อเมาส์หรือกดล้อค้างแล้วลากเพื่อซูม · Shift+ลากหรือคลิกขวาลากเพื่อเลื่อน · สองนิ้วซูม/เลื่อน · คลิกหนังสือบนชั้นเพื่อเปิดโปรเจกต์ · คลิกกรอบรูปหรือรีโมท';
+
+    // Give every room material the same four discrete light bands as the plant.
+    const gradientMap = new THREE.DataTexture(
+      new Uint8Array([
+        64, 64, 64, 255,
+        122, 122, 122, 255,
+        191, 191, 191, 255,
+        255, 255, 255, 255
+      ]), 4, 1, THREE.RGBAFormat
+    );
+    gradientMap.magFilter = THREE.NearestFilter;
+    gradientMap.minFilter = THREE.NearestFilter;
+    gradientMap.generateMipmaps = false;
+    gradientMap.needsUpdate = true;
+    const toonMaterials = new Map();
+    function toonMaterial(source) {
+      if (!toonMaterials.has(source)) {
+        toonMaterials.set(source, new THREE.MeshToonMaterial({
+          color: source.color.clone(),
+          map: source.map,
+          gradientMap,
+          emissive: source.emissive.clone(),
+          emissiveMap: source.emissiveMap,
+          emissiveIntensity: source.emissiveIntensity,
+          transparent: source.transparent,
+          opacity: source.opacity,
+          alphaTest: source.alphaTest,
+          side: source.side,
+          depthWrite: source.depthWrite
+        }));
+      }
+      return toonMaterials.get(source);
+    }
+
+    // Displace stem and leaf vertices in real time; pot and soil stay still.
+    const timeUniform = { value: 0 };
+    const plantLightLevel = { value: 1 };
+    const plantVertexShader = `
+      uniform float uTime;
+      uniform float uSway;
+      varying vec3 vNormal;
+      varying vec3 vLight;
+      void main() {
+        vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+        float height = clamp((worldPosition.y - 0.65) / 0.9, 0.0, 1.0);
+        worldPosition.x += sin(uTime * 1.8 + worldPosition.y * 2.4 + worldPosition.z) * 0.13 * height * uSway;
+        worldPosition.z += cos(uTime * 1.3 + worldPosition.x * 2.0) * 0.05 * height * uSway;
+        vNormal = normalize(normalMatrix * normal);
+        vLight = normalize((viewMatrix * vec4(0.45, 0.9, 0.35, 0.0)).xyz);
+        vec4 mvPosition = viewMatrix * worldPosition;
+        gl_Position = projectionMatrix * mvPosition;
+      }
+    `;
+    const plantFragmentShader = `
+      uniform vec3 uColor;
+      uniform float uLightLevel;
+      varying vec3 vNormal;
+      varying vec3 vLight;
+      void main() {
+        float light = max(dot(normalize(vNormal), normalize(vLight)), 0.0);
+        float band = light < 0.20 ? 0.25 : light < 0.48 ? 0.48 : light < 0.78 ? 0.75 : 1.0;
+        gl_FragColor = vec4(uColor * band * uLightLevel, 1.0);
+      }
+    `;
+    function plantMaterial(color, sway) {
+      return new THREE.ShaderMaterial({
+        uniforms: {
+          uTime: timeUniform,
+          uSway: { value: sway },
+          uColor: { value: new THREE.Color(color) },
+          uLightLevel: plantLightLevel
+        },
+        vertexShader: plantVertexShader,
+        fragmentShader: plantFragmentShader,
+        side: THREE.DoubleSide
+      });
+    }
+    const leafMaterial = plantMaterial(0x3ea84b, 1);
+    const stemMaterial = plantMaterial(0x2c7438, 1);
+    const potMaterial = plantMaterial(0xc78583, 0);
+    const soilMaterial = plantMaterial(0x775545, 0);
+
+    let room = null;
+    let roomMixer = null;
+    const animationClock = new THREE.Clock();
+    let acFlapPivot = null;
+    let acLampMesh = null;
+    let acIndicatorLight = null;
+    let acRemoteButton = null;
+    let pbrSphere = null;
+    let monitorSpill = null;
+    let laptopSpill = null;
+    let acStatusGreen = true;
+    let framePhoto = null;
+    const frameText = [];
+    let frameTextVisible = false;
+    let profileOpen = false;
+    let shelfOpen = false;
+    let shelfReturnView = null;
+    let savedView = null;
+    let viewTransition = null;
+    const loader = new THREE.GLTFLoader();
+    function showRoom(gltf) {
+      room = gltf.scene;
+      roomMixer = new THREE.AnimationMixer(room);
+      gltf.animations.forEach(clip => roomMixer.clipAction(clip).play());
+      let acBody = null;
+      let monitorScreen = null;
+      let laptopScreen = null;
+      room.traverse(object => {
+        if (object.isMesh) {
+          const name = object.name.replace(/_/g, ' ');
+          object.castShadow = true;
+          object.receiveShadow = /Floor|Room floor|Wall|rug/i.test(name);
+          if (name.startsWith('Toon plant leaf')) object.material = leafMaterial;
+          else if (name.startsWith('Toon plant stem')) object.material = stemMaterial;
+          else if (name === 'Toon plant pot') object.material = potMaterial;
+          else if (name === 'Toon plant soil') object.material = soilMaterial;
+          else if (name === 'PBR polished metal desk sphere') {
+            // Keep the glTF MeshStandardMaterial and its Blender metallic/roughness values.
+            pbrSphere = object;
+            object.material.envMapIntensity = 1.2;
+          }
+          else object.material = Array.isArray(object.material)
+            ? object.material.map(toonMaterial) : toonMaterial(object.material);
+          if (name === 'nav lighting Air conditioner EAST wall') acBody = object;
+          if (name === 'AC green lamp') acLampMesh = object;
+          if (name === 'AC remote power button') acRemoteButton = object;
+          if (name === 'Personal info photo') framePhoto = object;
+          if (name === 'Computer screen white') monitorScreen = object;
+          if (name === 'Notebook screen facing seat') laptopScreen = object;
+          if (name.startsWith('Personal info text')) {
+            object.visible = false;
+            frameText.push(object);
+          }
+        }
+      });
+
+      // The dark vent stays behind a separate cream flap that swings on its top edge.
+      acFlapPivot = new THREE.Group();
+      acFlapPivot.position.set(3.33, 2.91, 0.65);
+      const flap = new THREE.Mesh(
+        new THREE.BoxGeometry(0.045, 0.13, 1.4),
+        acBody.material.clone()
+      );
+      flap.position.set(0, -0.065, 0);
+      flap.castShadow = true;
+      flap.receiveShadow = true;
+      acFlapPivot.add(flap);
+      const hinge = new THREE.Mesh(
+        new THREE.BoxGeometry(0.055, 0.04, 1.42),
+        acBody.material.clone()
+      );
+      hinge.position.set(3.337, 2.91, 0.65);
+      hinge.castShadow = true;
+      room.add(hinge);
+      room.add(acFlapPivot);
+
+      // Seat the small indicator against the front panel and light only its immediate area.
+      acLampMesh.position.x = 3.337;
+      acLampMesh.material = new THREE.MeshToonMaterial({
+        color: 0x1a6932,
+        emissive: 0x47d967,
+        emissiveIntensity: 0.8,
+        gradientMap,
+        toneMapped: false
+      });
+      acIndicatorLight = new THREE.PointLight(0x55e878, 0.65, 0.4, 2);
+      acIndicatorLight.position.set(3.31, 3.09, 0.05);
+      room.add(acIndicatorLight);
+      acRemoteButton.material = new THREE.MeshToonMaterial({
+        color: 0x2a8d47,
+        emissive: 0x47d967,
+        emissiveIntensity: 0.35,
+        gradientMap
+      });
+      scene.add(room);
+      const monitorCenter = monitorScreen.getWorldPosition(new THREE.Vector3());
+      monitorScreen.material.color.setHex(0xdcefff);
+      monitorScreen.material.emissive.setHex(0xa6d9ff);
+      monitorScreen.material.emissiveIntensity = 0.7;
+      const monitorGlow = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.9, 1.25), screenGlowMaterial
+      );
+      monitorGlow.position.copy(monitorCenter);
+      monitorGlow.position.x -= 0.025;
+      monitorGlow.rotation.y = -Math.PI / 2;
+      scene.add(monitorGlow);
+      monitorSpill = new THREE.SpotLight(0xa9d9ff, 1.1, 3.2, Math.PI / 3, 0.9, 2);
+      monitorSpill.position.copy(monitorCenter);
+      monitorSpill.position.x -= 0.07;
+      monitorSpill.target.position.set(monitorCenter.x - 1.6, monitorCenter.y - 0.5, monitorCenter.z);
+      scene.add(monitorSpill, monitorSpill.target);
+
+      const laptopCenter = laptopScreen.getWorldPosition(new THREE.Vector3());
+      laptopScreen.material = laptopScreen.material.clone();
+      laptopScreen.material.emissive.setHex(0x5aa9ff);
+      laptopScreen.material.emissiveIntensity = 0.65;
+      laptopSpill = new THREE.PointLight(0x85bdff, 0.25, 1.6, 2);
+      laptopSpill.position.copy(laptopCenter);
+      laptopSpill.position.x -= 0.1;
+      scene.add(laptopSpill);
+      status.textContent = roomControlsHint;
+    }
+    function loadError(error) {
+      console.error(error);
+      status.textContent = 'โหลดโมเดลไม่สำเร็จ';
+    }
+    if (location.protocol === 'file:') {
+      // Browsers block fetching a local GLB. A script file can carry the same bytes.
+      const bytes = Uint8Array.from(atob(roomGlbBase64), char => char.charCodeAt(0));
+      loader.parse(bytes.buffer, '', showRoom, loadError);
+    } else {
+      loader.load('portfolio-room/portfolio_room.glb', showRoom, undefined, loadError);
+    }
+
+    function toggleACStatus() {
+      acStatusGreen = !acStatusGreen;
+      acLampMesh.material.color.setHex(acStatusGreen ? 0x1a6932 : 0x8e2530);
+      acLampMesh.material.emissive.setHex(acStatusGreen ? 0x47d967 : 0xff4e55);
+      acIndicatorLight.color.setHex(acStatusGreen ? 0x55e878 : 0xff5258);
+      acRemoteButton.material.color.setHex(acStatusGreen ? 0x2a8d47 : 0xa7333b);
+      acRemoteButton.material.emissive.setHex(acStatusGreen ? 0x47d967 : 0xff4e55);
+      status.textContent = `ไฟสถานะแอร์: ${acStatusGreen ? 'สีเขียว' : 'สีแดง'} · คลิกรีโมทอีกครั้งเพื่อสลับ`;
+    }
+
+    // Books open projects; the frame and remote keep their own actions.
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    let pointerStart = null;
+    const activePointers = new Set();
+    function interactiveTarget(event) {
+      if (!room || viewTransition) return false;
+      const rect = canvas.getBoundingClientRect();
+      pointer.set(
+        (event.clientX - rect.left) / rect.width * 2 - 1,
+        -(event.clientY - rect.top) / rect.height * 2 + 1
+      );
+      raycaster.setFromCamera(pointer, camera);
+      const hit = raycaster.intersectObjects(room.children, true)[0];
+      if (!hit) return null;
+      const name = hit.object.name.replace(/_/g, ' ');
+      const book = /^Project book (\d+)$/.exec(name);
+      if (book) return `book:${Number(book[1]) - 1}`;
+      if (name.startsWith('Personal info')) return 'frame';
+      if (name.startsWith('AC remote')) return 'remote';
+      if (name.includes('Notebook')) return 'notebook';
+      return null;
+    }
+    function showFrameText(show) {
+      frameTextVisible = show;
+      framePhoto.visible = !show;
+      frameText.forEach(object => { object.visible = show; });
+      frameToggle.textContent = show ? 'ดูรูป' : 'ดูข้อความ';
+      frameToggle.setAttribute('aria-label', show ? 'สลับเป็นรูปถ่าย' : 'สลับเป็นข้อความ 3D');
+    }
+    frameToggle.addEventListener('click', () => {
+      if (!profileOpen || viewTransition) return;
+      showFrameText(!frameTextVisible);
+    });
+    function startViewTransition(endPosition, endTarget, showingText) {
+      bookTooltip.hidden = true;
+      viewTransition = {
+        startTime: performance.now(),
+        startPosition: camera.position.clone(),
+        startTarget: controls.target.clone(),
+        endPosition,
+        endTarget,
+        showingText
+      };
+    }
+    function openProfile() {
+      if (!framePhoto || profileOpen) return;
+      savedView = {
+        position: camera.position.clone(),
+        target: controls.target.clone()
+      };
+      profileOpen = true;
+      controls.enableRotate = controls.enablePan = controls.enableZoom = false;
+      booksButton.hidden = true;
+      status.textContent = 'กำลังซูมเข้าหาข้อความที่สร้างใน Blender · กด Esc เพื่อกลับ';
+      startViewTransition(
+        new THREE.Vector3(2.12, 1.6, -2.54),
+        new THREE.Vector3(3.11, 1.57, -2.54),
+        true
+      );
+    }
+    function closeProfile() {
+      if (!profileOpen) return;
+      profileOpen = false;
+      showFrameText(false);
+      startViewTransition(savedView.position, savedView.target, false);
+      status.textContent = 'กำลังกลับมุมห้อง';
+    }
+    booksButton.addEventListener('click', () => {
+      if (!room || profileOpen || viewTransition) return;
+      if (shelfOpen) {
+        startViewTransition(shelfReturnView.position, shelfReturnView.target, false);
+        shelfOpen = false;
+      } else {
+        shelfReturnView = { position: camera.position.clone(), target: controls.target.clone() };
+        startViewTransition(
+          new THREE.Vector3(-3, 3, -0.2),
+          new THREE.Vector3(-1.54, 2.4, -3.52),
+          false
+        );
+        shelfOpen = true;
+      }
+      const label = shelfOpen ? 'กลับมุมห้อง' : 'ซูมไปที่ชั้นหนังสือ';
+      booksButton.setAttribute('aria-label', label);
+      booksButton.setAttribute('aria-pressed', String(shelfOpen));
+      booksButton.title = label;
+    });
+    window.addEventListener('keydown', event => {
+      if (event.key === 'Escape') closeProfile();
+    });
+    canvas.addEventListener('pointerdown', event => {
+      bookTooltip.hidden = true;
+      activePointers.add(event.pointerId);
+      pointerStart = activePointers.size === 1
+        ? { id: event.pointerId, x: event.clientX, y: event.clientY }
+        : null;
+    });
+    canvas.addEventListener('pointermove', event => {
+      if (pointerStart && Math.hypot(event.clientX - pointerStart.x,
+                                     event.clientY - pointerStart.y) > 5) {
+        bookTooltip.hidden = true;
+        return;
+      }
+      const target = interactiveTarget(event);
+      canvas.style.cursor = target ? 'pointer' : 'grab';
+      if ((target?.startsWith('book:') || target === 'notebook') && !profileOpen) {
+        bookTooltip.textContent = target === 'notebook'
+          ? 'www.krittanon.site'
+          : projects[Number(target.slice(5))].title;
+        bookTooltip.hidden = false;
+        const stage = canvas.parentElement.getBoundingClientRect();
+        const x = event.clientX - stage.left + 14;
+        const y = event.clientY - stage.top + 14;
+        bookTooltip.style.left = `${Math.max(8, Math.min(x, stage.width - bookTooltip.offsetWidth - 8))}px`;
+        bookTooltip.style.top = `${Math.max(8, Math.min(y, stage.height - bookTooltip.offsetHeight - 8))}px`;
+      } else {
+        bookTooltip.hidden = true;
+      }
+      if (!profileOpen && !viewTransition) {
+        status.textContent = target?.startsWith('book:')
+          ? `คลิกหนังสือเพื่อเปิด ${projects[Number(target.slice(5))].title}`
+          : roomControlsHint;
+      }
+    });
+    canvas.addEventListener('pointerup', event => {
+      activePointers.delete(event.pointerId);
+      if (!pointerStart || pointerStart.id !== event.pointerId) return;
+      const distance = Math.hypot(event.clientX - pointerStart.x,
+                                  event.clientY - pointerStart.y);
+      pointerStart = null;
+      if (distance <= 5) {
+        const target = interactiveTarget(event);
+        if (target?.startsWith('book:') && !profileOpen) {
+          const project = projects[Number(target.slice(5))];
+          if (project.popup) {
+            bookTooltip.hidden = true;
+            document.getElementById('resume-pdf').src = project.href;
+            resumeDialog.showModal();
+          } else window.location.href = project.href;
+        } else if (target === 'frame') {
+          if (profileOpen) closeProfile();
+          else openProfile();
+        } else if (target === 'remote' && !profileOpen) {
+          toggleACStatus();
+        } else if (target === 'notebook' && !profileOpen) {
+          window.location.href = 'https://www.krittanon.site/';
+        }
+      }
+    });
+    canvas.addEventListener('pointercancel', event => {
+      activePointers.delete(event.pointerId);
+      pointerStart = null;
+      bookTooltip.hidden = true;
+    });
+    canvas.addEventListener('pointerleave', () => { bookTooltip.hidden = true; });
+
+    let viewportWidth = 0;
+    let viewportHeight = 0;
+    function draw() {
+      timeUniform.value = performance.now() / 1000;
+      if (viewTransition) {
+        const progress = Math.min((performance.now() - viewTransition.startTime) / 950, 1);
+        const eased = progress * progress * (3 - 2 * progress);
+        const target = viewTransition.startTarget.clone().lerp(viewTransition.endTarget, eased);
+        const position = viewTransition.startPosition.clone().lerp(viewTransition.endPosition, eased);
+        const offset = position.sub(target);
+        controls.target.copy(target);
+        controls.radius = offset.length();
+        controls.theta = Math.atan2(offset.x, offset.z);
+        controls.phi = Math.acos(THREE.MathUtils.clamp(offset.y / controls.radius, -1, 1));
+        if (viewTransition.showingText && progress >= 0.75) showFrameText(true);
+        if (progress === 1) {
+          controls.enableRotate = controls.enablePan = controls.enableZoom = true;
+          if (viewTransition.showingText) {
+            status.textContent = 'ลากหมุน · ล้อเมาส์ซูม · Shift+ลากเพื่อเลื่อน · ปุ่มบนกรอบสลับรูป/ข้อความ · คลิกกรอบอีกครั้งหรือกด Esc เพื่อกลับมุมห้อง';
+          } else {
+            booksButton.hidden = false;
+            status.textContent = roomControlsHint;
+          }
+          viewTransition = null;
+        }
+      }
+      if (acFlapPivot) {
+        acFlapPivot.rotation.z = -0.02 - 0.40 * (0.5 + 0.5 * Math.sin(timeUniform.value * 1.6));
+      }
+      if (roomMixer) roomMixer.update(Math.min(animationClock.getDelta(), 0.1));
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      // Compare CSS sizes: fractional display scales can round the drawing
+      // buffer differently and must not trigger a resize on every frame.
+      if (width > 0 && height > 0 &&
+          (width !== viewportWidth || height !== viewportHeight)) {
+        const firstLayout = viewportWidth === 0;
+        viewportWidth = width;
+        viewportHeight = height;
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        // Frame the room once; subsequent resizes preserve the user's zoom.
+        if (firstLayout && camera.aspect < 1 && !profileOpen && !viewTransition) {
+          controls.radius = 17.3 / camera.aspect;
+        }
+      }
+      controls.update();
+      frameToggle.hidden = !profileOpen || !!viewTransition || !framePhoto;
+      if (!frameToggle.hidden) {
+        camera.updateMatrixWorld();
+        const bounds = new THREE.Box3().setFromObject(framePhoto);
+        const anchor = bounds.getCenter(new THREE.Vector3());
+        anchor.x = bounds.min.x - 0.005;
+        anchor.y = bounds.min.y + 0.015;
+        anchor.project(camera);
+        frameToggle.style.left = `${(anchor.x + 1) * width / 2}px`;
+        frameToggle.style.top = `${(1 - anchor.y) * height / 2}px`;
+      }
+      renderer.render(scene, camera);
+      requestAnimationFrame(draw);
+    }
+    draw();
+  </script>
 </body>
 </html>

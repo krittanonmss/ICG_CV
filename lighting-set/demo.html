@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lighting</title>
+  <link rel="stylesheet" href="../layout.css">
+  <link rel="stylesheet" href="lighting.css">
+</head>
+
+<body class="model-page lighting-demo">
+  <main>
+    <a class="back-button" href="index.html" aria-label="กลับ Lighting Studies" title="กลับ Lighting Studies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 5-7 7 7 7M3 12h18"/></svg></a>
+    <h1 id="demo-title">Lighting</h1>
+    <div class="stage" id="lighting-stage"></div>
+    <nav class="demo-nav">
+        <div class="demo-links">
+            <a href="demo.html?mode=lighting">Lighting</a>
+            <a href="demo.html?mode=combined-lights">Combined lights</a>
+            <a href="demo.html?mode=background">Background</a>
+            <a href="demo.html?mode=fog">Fog</a>
+            <a href="demo.html?mode=skybox">Skybox</a>
+            <a href="demo.html?mode=panoramic-360">Panoramic 360 EXR</a>
+        </div>
+    </nav>
+    <p class="hint">Drag to orbit · Mouse wheel to zoom</p>
+  </main>
+    <!-- core three.js -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="../simple-orbit-controls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/lights/RectAreaLightUniformsLib.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/fflate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/EXRLoader.js"></script>
+
+    <script src="model-data.js"></script>
+    <script src="skybox-data.js"></script>
+    <script>
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true; // Shadow
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.querySelector("#lighting-stage").appendChild(renderer.domElement);
+
+        const scene = new THREE.Scene();
+        const mode = new URLSearchParams(window.location.search).get('mode') || 'lighting';
+        const titles = {
+            lighting: ['Lighting', 'Colored spotlights illuminate the model and floor.'],
+            'combined-lights': ['Combined Lights', 'Point, colored spot, directional, and area lights together.'],
+            background: ['Background', 'A clear sky background without fog or an environment map.'],
+            fog: ['Fog', 'Distance fog fades the floor and model into the sky color.'],
+            skybox: ['Skybox', 'A local equirectangular image surrounds and lights the scene.'],
+            'panoramic-360': ['Panoramic 360 EXR', 'A 360-degree HDR environment from the Venice Sunset EXR.']
+        };
+        const currentDemo = titles[mode] || titles.lighting;
+        document.querySelector('#demo-title').textContent = currentDemo[0];
+        document.title = currentDemo[0];
+        scene.background = new THREE.Color(0x87ceeb);
+        if (mode === 'fog') scene.fog = new THREE.Fog(0x87ceeb, 7, 12);
+
+        // Load the panoramic EXR only for its dedicated variation.
+        if (mode === 'panoramic-360') {
+        const exrSkyboxUrl = 'https://dl.polyhaven.org/file/ph-assets/HDRIs/exr/1k/venice_sunset_1k.exr';
+        const pmremGenerator = new THREE.PMREMGenerator(renderer);
+        pmremGenerator.compileEquirectangularShader();
+
+        new THREE.EXRLoader()
+            .setDataType(THREE.FloatType)
+            .load(exrSkyboxUrl, (texture) => {
+                const skybox = pmremGenerator.fromEquirectangular(texture).texture;
+                scene.background = skybox;
+                scene.environment = skybox;
+
+                texture.dispose();
+                pmremGenerator.dispose();
+            }, undefined, (error) => {
+                console.error('Unable to load EXR skybox:', error);
+            });
+        }
+
+        // Skybox made from the local JPEG image.
+        if (mode === 'skybox') {
+            const jpegSkybox = new THREE.TextureLoader().load(globalThis.lightingSkyboxImage);
+            jpegSkybox.mapping = THREE.EquirectangularReflectionMapping;
+            jpegSkybox.encoding = THREE.sRGBEncoding;
+            scene.background = jpegSkybox;
+            scene.environment = jpegSkybox;
+        }
+
+        // Ambient light
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
+        scene.add(ambientLight);
+
+        
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            1,
+            0.1,
+            1000
+        );
+        camera.position.set(0, 2, 5);
+        camera.lookAt(0, 0, 0);
+        const controls = new SimpleOrbitControls(camera, renderer.domElement);
+        controls.target.set(0, 1, 0);
+        controls.update();
+
+        // Point light above and in front of the model
+        const pointLight = new THREE.PointLight(0xffffff, 0.7, 20, 2);
+        pointLight.position.set(2, 4, 3);
+        pointLight.castShadow = true;
+        pointLight.shadow.mapSize.set(1024, 1024);
+        pointLight.shadow.camera.near = 0.1;
+        pointLight.shadow.camera.far = 20;
+        pointLight.shadow.bias = -0.001;
+        scene.add(pointLight);
+
+        // Makes the light position visible in the scene.
+        const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.15);
+        scene.add(pointLightHelper);
+
+        // Red spotlight
+        const redSpotLight = new THREE.SpotLight(0xff0000, 3, 10, Math.PI / 9, 0, 2);
+        redSpotLight.position.set(2, 4, -2);
+        redSpotLight.target.position.set(2.4, 0, -2.25);
+        scene.add(redSpotLight);
+        scene.add(redSpotLight.target);
+
+        // Green spotlight
+        const greenSpotLight = new THREE.SpotLight(0x00ff00, 3, 10, Math.PI / 9, 0, 2);
+        greenSpotLight.position.set(4, 4, -2);
+        greenSpotLight.target.position.set(3.6, 0, -2.25);
+        scene.add(greenSpotLight);
+        scene.add(greenSpotLight.target);
+
+        // Blue spotlight
+        const blueSpotLight = new THREE.SpotLight(0x0000ff, 3, 10, Math.PI / 9, 0, 2);
+        blueSpotLight.position.set(3, 4, -4);
+        blueSpotLight.target.position.set(3, 0, -3.25);
+        scene.add(blueSpotLight);
+        scene.add(blueSpotLight.target);
+
+        // Directional light
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight.position.set(10, 10, 10);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+
+        // Area light
+        THREE.RectAreaLightUniformsLib.init();
+        const areaLight = new THREE.RectAreaLight(0xffffff, 1.5, 2, 2);
+        areaLight.position.set(3, 1, 3);
+        areaLight.lookAt(0, 1, 0);
+        scene.add(areaLight);
+
+        // Second area light
+        const areaLight2 = new THREE.RectAreaLight(0xffffff, 1.5, 2, 2);
+        areaLight2.position.set(-3, 1, 3);
+        areaLight2.lookAt(0, 1, 0);
+        scene.add(areaLight2);
+
+        const showColoredSpots = true;
+        const showCombinedLights = mode !== 'lighting';
+        pointLight.visible = showCombinedLights;
+        pointLightHelper.visible = showCombinedLights;
+        directionalLight.visible = showCombinedLights;
+        areaLight.visible = showCombinedLights;
+        areaLight2.visible = showCombinedLights;
+        redSpotLight.visible = showColoredSpots;
+        greenSpotLight.visible = showColoredSpots;
+        blueSpotLight.visible = showColoredSpots;
+        
+
+
+
+
+
+
+// Mesh coordinates are in model-data.js.
+
+
+        const geom = new THREE.BufferGeometry();
+        geom.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        geom.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+        geom.computeVertexNormals();
+
+        const tex = new THREE.TextureLoader().load('https://sibsansuk.github.io/5241_Capheny2.png');
+        const mat = new THREE.MeshStandardMaterial({
+            map: tex,
+            envMapIntensity: 0.5
+        });
+
+        const mesh = new THREE.Mesh(geom, mat);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        scene.add(mesh);
+
+
+        //ใส่พื้น
+        const texFloor = new THREE.TextureLoader().load('https://sibsansuk.github.io/mossy_cobblestone_diff_1k.jpg');
+        const matFloor = new THREE.MeshStandardMaterial({
+            map: texFloor,
+            envMapIntensity: 0.5
+        });
+        const planeGeometry = new THREE.PlaneGeometry(10, 10);
+        const plane = new THREE.Mesh(planeGeometry, matFloor);
+        plane.rotation.x = -Math.PI / 2; 
+        plane.receiveShadow = true;
+        scene.add(plane);
+
+
+
+        
+        let viewportWidth = 0;
+        let viewportHeight = 0;
+        function animate(t) {
+            const width = renderer.domElement.clientWidth;
+            const height = renderer.domElement.clientHeight;
+            if (width > 0 && height > 0 && (width !== viewportWidth || height !== viewportHeight)) {
+                viewportWidth = width;
+                viewportHeight = height;
+                renderer.setSize(width, height, false);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+            }
+            mesh.rotation.y = Math.sin(t * 0.001);
+            controls.update();
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        animate(0);
+
+
+    </script>
+</body>
+
+</html>

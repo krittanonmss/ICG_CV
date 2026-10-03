@@ -1,0 +1,89 @@
+/* Only page layout and a few basic control sizes. */
+html, body { margin: 0; }
+body { font: 16px Arial, sans-serif; }
+h1 { font-size: 24px; margin: 0 0 10px; }
+h2 { font-size: 18px; }
+p { margin: 8px 0; }
+small { font-size: 13px; }
+button {
+  border: 0;
+  border-radius: 0;
+  background: #ddd;
+  padding: 5px 9px;
+  font: inherit;
+  cursor: pointer;
+}
+button.active { background: #aaa; }
+
+/* Project lists */
+.index-page { padding: 20px; }
+.index-page main { max-width: 960px; margin: auto; }
+.grid { display: block; }
+.grid > a { display: block; padding: 5px 0; }
+.grid small { display: inline; margin-left: 8px; }
+
+/* Canvas pages with buttons beside or below the canvas */
+.model-page, .paint-page, .raster-page { padding: 20px; }
+.model-page main, .paint-page main, .raster-page main { max-width: 960px; margin: auto; }
+.stage canvas { display: block; width: 100%; }
+#gl-canvas { height: auto; aspect-ratio: 16 / 9; touch-action: none; }
+#chair-canvas { height: min(65vh, 600px); min-height: 300px; touch-action: none; }
+#room-canvas { height: min(72vh, 700px); min-height: 380px; touch-action: none; }
+.stage { position: relative; }
+.badge { position: absolute; left: 8px; bottom: 8px; background: white; padding: 3px; font-size: 12px; }
+.controls, .control-buttons { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0; }
+.hint { font-size: 13px; }
+.info { margin-top: 16px; }
+
+/* Paint tools */
+.workspace { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 10px; }
+.tool-grid, .width-options { display: flex; flex-wrap: wrap; gap: 4px; }
+.tool-grid button { min-width: 65px; }
+.panel-label { margin: 12px 0 5px; }
+.width-button { width: 30px; height: 30px; padding: 0; }
+.width-button span { display: block; width: 16px; background: black; margin: auto; }
+#clear-canvas { margin-top: 12px; }
+#paint-canvas { display: block; width: 100%; height: auto; background: white; touch-action: none; }
+.color-bar, .palette { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.color-bar { margin-top: 10px; }
+.swatch { width: 26px; height: 26px; padding: 0; }
+.swatch.active { outline: 2px solid black; }
+.current { display: inline-block; width: 30px; height: 30px; }
+
+/* Raster sprite controls */
+.raster-page .panel { display: grid; grid-template-columns: minmax(0, 1fr) 210px; gap: 12px; }
+#canvas { display: block; width: 100%; aspect-ratio: 1; image-rendering: pixelated; }
+.raster-page .control { margin: 10px 0; }
+.raster-page .control strong, .raster-page .control small { display: block; }
+.raster-page .status { margin: 10px 0; }
+
+/* Demos that use the whole window for a WebGL canvas */
+.scene-page, .shader-page { height: 100%; overflow: hidden; }
+.scene-page > canvas, .shader-page > canvas { display: block; width: 100%; height: 100%; }
+.scene-page nav, .shader-page nav {
+  position: fixed;
+  z-index: 2;
+  left: 8px;
+  top: 8px;
+  max-width: calc(100vw - 24px);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 4px;
+}
+.scene-page nav a, .shader-page nav a { margin-right: 7px; }
+.demo-nav strong, .demo-nav p { display: block; margin: 3px 0; }
+.demo-links { display: flex; flex-wrap: wrap; gap: 3px 8px; }
+.label, .shader-page main {
+  position: fixed;
+  z-index: 1;
+  top: 8px;
+  left: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 4px;
+  pointer-events: none;
+}
+.shader-page nav { top: auto; bottom: 8px; }
+
+@media (max-width: 650px) {
+  .workspace, .raster-page .panel { display: block; }
+  .paint-page .toolbar, .raster-page .controls { margin-top: 10px; }
+}

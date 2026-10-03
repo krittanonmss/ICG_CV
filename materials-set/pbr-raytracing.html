@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PBR + Raytracing</title>
+  <link rel="stylesheet" href="../layout.css">
+  <link rel="stylesheet" href="materials.css">
+</head>
+<body class="model-page material-demo">
+    <main><a class="back-button" href="index.html" title="กลับ Material Studies" aria-label="กลับ Material Studies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 5-7 7 7 7M3 12h18"/></svg></a>
+<h1>PBR + Raytracing</h1>
+<div class="stage" id="material-stage"></div>
+<nav class="demo-nav"><div class="demo-links"><a href="classic-materials.html?material=basic">Basic / Lambert / Phong / PBR</a><a href="application-pbr.html">Application PBR</a><a href="glb-pbr.html">GLB PBR</a></div></nav>
+<p class="hint">Drag to orbit · Mouse wheel to zoom</p></main>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="../simple-orbit-controls.js"></script>
+    <script src="scene-layout.js"></script>
+    <script>
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.15;
+        document.querySelector("#material-stage").appendChild(renderer.domElement);
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xcfd4d6);
+
+        const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 3, 7);
+        camera.lookAt(0, 0.8, 0);
+
+        bindMaterialViewport(renderer, camera);
+        const controls = new SimpleOrbitControls(camera, renderer.domElement);
+        controls.target.set(0, 0.8, 0);
+        controls.update();
+
+        const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, {
+            format: THREE.RGBAFormat,
+            generateMipmaps: true,
+            minFilter: THREE.LinearMipmapLinearFilter,
+            encoding: THREE.sRGBEncoding
+        });
+        const cubeCamera = new THREE.CubeCamera(0.1, 100, cubeRenderTarget);
+        scene.add(cubeCamera);
+
+        scene.add(new THREE.HemisphereLight(0xffffff, 0x5f6670, 0.85));
+
+        const areaLight = new THREE.RectAreaLight(0xffffff, 3.2, 5, 5);
+        areaLight.position.set(-2.5, 5, 3.5);
+        areaLight.lookAt(0, 0, 0);
+        scene.add(areaLight);
+
+        const keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        keyLight.position.set(-4, 7, 4);
+        keyLight.castShadow = true;
+        keyLight.shadow.mapSize.set(2048, 2048);
+        keyLight.shadow.camera.left = -6;
+        keyLight.shadow.camera.right = 6;
+        keyLight.shadow.camera.top = 6;
+        keyLight.shadow.camera.bottom = -6;
+        scene.add(keyLight);
+
+        const floor = new THREE.Mesh(
+            new THREE.PlaneGeometry(12, 12),
+            new THREE.MeshPhysicalMaterial({
+                color: 0xd4d7d8,
+                roughness: 0.32,
+                metalness: 0.0,
+                clearcoat: 0.25,
+                clearcoatRoughness: 0.25
+            })
+        );
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        const sphereGeometry = new THREE.SphereGeometry(0.55, 96, 96);
+        const reflectiveMap = cubeRenderTarget.texture;
+        const materials = [
+            new THREE.MeshPhysicalMaterial({ color: 0xff2f6d, roughness: 0.22, metalness: 0.0, clearcoat: 0.6 }),
+            new THREE.MeshPhysicalMaterial({ color: 0xffc857, roughness: 0.18, metalness: 0.0, clearcoat: 0.7 }),
+            new THREE.MeshPhysicalMaterial({ color: 0x00b8a9, roughness: 0.16, metalness: 0.0, clearcoat: 0.7 }),
+            new THREE.MeshPhysicalMaterial({ color: 0xe6e8f0, roughness: 0.08, metalness: 1.0, envMap: reflectiveMap }),
+            new THREE.MeshPhysicalMaterial({ color: 0x6a4c93, roughness: 0.03, metalness: 1.0, envMap: reflectiveMap }),
+            new THREE.MeshPhysicalMaterial({ color: 0x95d5b2, roughness: 0.05, metalness: 1.0, envMap: reflectiveMap })
+        ];
+
+        const spheres = [];
+        const positions = [
+            [-2.3, 0.55, -0.7],
+            [0, 0.55, -0.7],
+            [2.3, 0.55, -0.7],
+            [-2.3, 0.55, 1.05],
+            [0, 0.55, 1.05],
+            [2.3, 0.55, 1.05]
+        ];
+
+        positions.forEach((position, index) => {
+            const sphere = new THREE.Mesh(sphereGeometry, materials[index]);
+            sphere.position.set(position[0], position[1], position[2]);
+            sphere.castShadow = true;
+            sphere.receiveShadow = true;
+            scene.add(sphere);
+            spheres.push(sphere);
+        });
+
+        function animate() {
+            spheres.forEach((sphere) => sphere.visible = false);
+            cubeCamera.position.set(0, 0.8, 1);
+            cubeCamera.update(renderer, scene);
+            spheres.forEach((sphere) => sphere.visible = true);
+
+            controls.update();
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        
+    </script>
+</body>
+</html>

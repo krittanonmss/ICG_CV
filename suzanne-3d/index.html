@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>3D Suzanne — WebGL</title>
+  <link rel="stylesheet" href="../layout.css">
+  <style>
+    .back-button { position: fixed; top: 14px; left: 14px; z-index: 3; display: grid; place-items: center; box-sizing: border-box; width: 42px; height: 42px; border: 1px solid rgba(45,50,65,.14); border-radius: 50%; background: rgba(255,255,255,.86); color: #343b50; box-shadow: 0 2px 10px rgba(0,0,0,.1); text-decoration: none; }
+    .back-button svg { width: 22px; height: 22px; }
+    .back-button:hover { background: #f4f2ee; }
+    .back-button:focus-visible { outline: 2px solid #343b50; outline-offset: 2px; }
+    .model-page { padding-top: 68px; }
+  </style>
+</head>
+<body class="model-page"><main>
+  <a class="back-button" href="../index.html" aria-label="กลับห้อง Portfolio" title="กลับห้อง Portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 5-7 7 7 7M3 12h18"/></svg></a>
+  <header><h1>3D Suzanne</h1></header>
+  <div class="stage"><canvas id="gl-canvas" width="960" height="540" aria-label="Interactive 3D Suzanne model"></canvas><div class="badge">968 TRIANGLES · 2,904 VERTICES · THREE.JS</div></div>
+  <div class="controls"><button type="button" data-action="left">Rotate left</button><button type="button" data-action="right">Rotate right</button><button type="button" data-action="up">Rotate up</button><button type="button" data-action="down">Rotate down</button><button type="button" data-action="zoom-in">Zoom in</button><button type="button" data-action="zoom-out">Zoom out</button><button type="button" id="auto-rotate">Play auto rotate</button><button type="button" id="reset">Reset</button></div>
+  <p class="hint">Drag to rotate · Mouse wheel to zoom · Arrow keys rotate · + / − zoom</p>
+</main><script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script><script src="vertices.js"></script><script src="app.js"></script></body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Outline · Torus</title>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="../simple-orbit-controls.js"></script>
+  <script src="scene-layout.js"></script>
+  <link rel="stylesheet" href="../layout.css">
+  <link rel="stylesheet" href="shaders.css">
+</head>
+<body class="model-page shader-demo">
+<main><a class="back-button" href="index.html" aria-label="กลับ Shader Studies" title="กลับ Shader Studies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 5-7 7 7 7M3 12h18"/></svg></a><h1>Outline Torus</h1><div class="stage" id="shader-stage"></div><nav class="demo-nav"><div class="demo-links"><a href="toon-shade-torus.html">Toon Shade</a><a href="object-list.html">Object List</a><a href="picking-lerp.html">Picking &amp; Lerp</a></div></nav><p class="hint">Drag to orbit · Mouse wheel to zoom</p></main>
+
+
+<script>
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xffffff);
+  const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 2.8);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  
+  document.querySelector("#shader-stage").appendChild(renderer.domElement);
+  bindShaderViewport(renderer, camera);
+  const controls = new SimpleOrbitControls(camera, renderer.domElement);
+
+  const geometry = new THREE.TorusKnotBufferGeometry(0.52, 0.2, 96, 16);
+  const mainUniforms = {
+    uTime: { value: 0.0 },
+    uTexture: { value: new THREE.TextureLoader().load('https://threejs.org/examples/textures/uv_grid_opengl.jpg') },
+    uLightDir: { value: new THREE.Vector3(0.5, 1.0, 0.8).normalize() }
+  };
+  const mainVertex = `
+    uniform float uTime;
+    varying vec3 vNormal; varying vec3 vWorldPosition; varying vec2 vUv;
+    void main() {
+      vUv = uv; vNormal = normal;
+      vec3 pos = position;
+      pos.z += sin(pos.x * 5.0 + uTime) * 0.1;
+      gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(pos, 1.0);
+    }
+  `;
+  const mainFragment = `
+    uniform sampler2D uTexture;
+    uniform vec3 uLightDir;
+    varying vec3 vNormal; varying vec2 vUv;
+    void main() {
+      vec3 color = texture2D(uTexture, vUv).rgb * vec3(1.0, 0.45, 0.75);
+      vec3 N = normalize(vNormal);
+      vec3 L = normalize(uLightDir);
+      float diffuse = max(dot(N, L), 0.0);
+      float ambient = 0.5;
+      diffuse = smoothstep(0.2, 0.3, diffuse);
+      gl_FragColor = vec4(color * (diffuse + ambient), 1.0);
+    }
+  `;
+  const outlineVertex = `
+    uniform float uTime;
+    void main() {
+      // ขยาย mesh รอบนอก แล้วแสดงเฉพาะด้านหลัง
+      vec3 pos = position;
+      pos.z += sin(pos.x * 5.0 + uTime) * 0.1;
+      pos += normal * 0.08;
+      gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(pos, 1.0);
+    }
+  `;
+  const outlineFragment = `void main() { gl_FragColor = vec4(.015, .015, .025, 1.0); }`;
+  const outlineMaterial = new THREE.ShaderMaterial({
+    vertexShader: outlineVertex, fragmentShader: outlineFragment,
+    uniforms: mainUniforms, side: THREE.BackSide
+  });
+  const fillMaterial = new THREE.ShaderMaterial({ vertexShader: mainVertex, fragmentShader: mainFragment, uniforms: mainUniforms });
+  const outlineMesh = new THREE.Mesh(geometry, outlineMaterial);
+  const fillMesh = new THREE.Mesh(geometry, fillMaterial);
+  scene.add(outlineMesh, fillMesh);
+
+  
+  function animate() { controls.update(); renderer.render(scene, camera); requestAnimationFrame(animate); }
+  animate();
+</script>
+</body>
+</html>

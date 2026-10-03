@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Picking &amp; Lerp</title>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="../simple-orbit-controls.js"></script>
+  <script src="scene-layout.js"></script>
+  <link rel="stylesheet" href="../layout.css">
+  <link rel="stylesheet" href="shaders.css">
+</head>
+<body class="model-page shader-demo">
+<main><a class="back-button" href="index.html" aria-label="กลับ Shader Studies" title="กลับ Shader Studies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 5-7 7 7 7M3 12h18"/></svg></a><h1>Picking &amp; Lerp</h1><div class="stage" id="shader-stage"></div><nav class="demo-nav"><div class="demo-links"><a href="toon-shade-torus.html">Toon Shade</a><a href="outline.html">Outline</a><a href="object-list.html">Object List</a></div></nav><p>คลิกวัตถุเพื่อเลือก · ลากเพื่อหมุนมุมมอง</p><p id="selection">ยังไม่ได้เลือกวัตถุ</p></main>
+
+
+<script>
+  // ต่อยอดจาก shader_toon_outline_3objects.html: ใช้ shader, texture และ outline เดิม
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xffffff);
+
+  const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 6);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  document.querySelector("#shader-stage").appendChild(renderer.domElement);
+
+  bindShaderViewport(renderer, camera);
+  const controls = new SimpleOrbitControls(camera, renderer.domElement);
+
+  const texture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/uv_grid_opengl.jpg');
+  const lightDirection = new THREE.Vector3(0.4, 1.0, 0.8).normalize();
+  const vertexShader = `
+    uniform float uTime;
+    varying vec2 vUv;
+    varying vec3 vNormal;
+    void main() {
+      vUv = uv;
+      vNormal = normal;
+      vec3 pos = position;
+      pos.z += sin(pos.x * 5.0 + uTime) * 0.1;
+      gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(pos, 1.0);
+    }
+  `;
+  const fragmentShader = `
+    precision mediump float;
+    uniform sampler2D uTexture;
+    uniform vec3 uLightDir;
+    uniform float uHighlight;
+    varying vec2 vUv;
+    varying vec3 vNormal;
+    void main() {
+      vec3 color = texture2D(uTexture, vUv).rgb;
+      float diffuse = max(dot(normalize(vNormal), normalize(uLightDir)), 0.0);
+      diffuse = smoothstep(0.2, 0.3, diffuse);
+      color *= diffuse + 0.5;
+      color = mix(color, vec3(1.0, 0.35, 0.78), uHighlight * 0.42);
+      gl_FragColor = vec4(color, 1.0);
+    }
+  `;
+  const outlineVertexShader = `
+    uniform float uTime;
+    void main() {
+      vec3 pos = position;
+      pos.z += sin(pos.x * 5.0 + uTime) * 0.1;
+      pos += normal * 0.08;
+      gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(pos, 1.0);
+    }
+  `;
+  const outlineFragmentShader = `void main() { gl_FragColor = vec4(0.1, 0.1, 0.1, 1.0); }`;
+
+  const objects = [];
+  function addObject(name, geometry, position, rotation) {
+    // แต่ละวัตถุต้องมี uniforms ของตัวเองเพื่อ lerp สีเฉพาะตัวที่ถูกเลือก
+    const uniforms = {
+      uTime: { value: 0 },
+      uLightDir: { value: lightDirection },
+      uTexture: { value: texture },
+      uHighlight: { value: 0 }
+    };
+    const material = new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms, side: THREE.DoubleSide });
+    const outlineMaterial = new THREE.ShaderMaterial({
+      vertexShader: outlineVertexShader, fragmentShader: outlineFragmentShader,
+      uniforms, side: THREE.BackSide
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(...position);
+    if (rotation) mesh.rotation.set(...rotation);
+    mesh.userData.name = name;
+    mesh.userData.highlight = uniforms.uHighlight;
+    mesh.userData.baseScale = mesh.scale.clone();
+    mesh.add(new THREE.Mesh(geometry, outlineMaterial));
+    scene.add(mesh);
+    objects.push(mesh);
+    return mesh;
+  }
+
+  // สามวัตถุหลักอ้างอิงจาก Object List; สองชิ้นเล็กเพิ่มตามภาพ Picking & Lerp
+  addObject('Sphere', new THREE.SphereBufferGeometry(0.75, 32, 32), [-2, 0, 0]);
+  addObject('Torus Knot', new THREE.TorusKnotBufferGeometry(0.52, 0.2, 96, 16), [0, 0, 0]);
+  addObject('Box', new THREE.BoxBufferGeometry(1.25, 1.25, 1.25, 12, 12, 12), [2, 0, 0], [0.12, -0.25, 0]);
+  addObject('Dark Drop', new THREE.ConeBufferGeometry(0.22, 0.42, 32), [-0.85, 1.12, 0]);
+  addObject('Color Tip', new THREE.ConeBufferGeometry(0.16, 0.4, 32), [0.25, 1.22, 0], [0, 0, -0.35]);
+
+  const raycaster = new THREE.Raycaster();
+  const pointer = new THREE.Vector2();
+  const selectionLabel = document.getElementById('selection');
+  let selected = null;
+  let hovered = null;
+  let pointerStart = null;
+
+  function pick(event) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    return raycaster.intersectObjects(objects, false)[0]?.object || null;
+  }
+
+  renderer.domElement.addEventListener('pointerdown', event => {
+    pointerStart = { x: event.clientX, y: event.clientY };
+  });
+  renderer.domElement.addEventListener('pointermove', event => { hovered = pick(event); });
+  renderer.domElement.addEventListener('pointerleave', () => { hovered = null; });
+  renderer.domElement.addEventListener('pointerup', event => {
+    if (!pointerStart || Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) > 5) return;
+    selected = pick(event);
+    selectionLabel.textContent = selected ? `เลือก: ${selected.userData.name}` : 'ยังไม่ได้เลือกวัตถุ';
+    pointerStart = null;
+  });
+
+  
+
+  function animate(time) {
+    const seconds = time * 0.001;
+    objects.forEach(object => {
+      object.material.uniforms.uTime.value = seconds;
+      const active = object === selected || object === hovered;
+      const target = object === selected ? 1.18 : active ? 1.08 : 1;
+      object.scale.lerp(object.userData.baseScale.clone().multiplyScalar(target), 0.12);
+      object.userData.highlight.value = THREE.MathUtils.lerp(object.userData.highlight.value, active ? 1 : 0, 0.12);
+    });
+    controls.update();
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+</script>
+</body>
+</html>

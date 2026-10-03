@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Materials</title>
+  <link rel="stylesheet" href="../layout.css">
+  <link rel="stylesheet" href="materials.css">
+</head>
+<body class="model-page material-demo">
+  <main><a class="back-button" href="index.html" title="กลับ Material Studies" aria-label="กลับ Material Studies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 5-7 7 7 7M3 12h18"/></svg></a>
+<h1 id="title">Materials</h1>
+<div class="stage" id="material-stage"></div>
+<nav class="demo-nav"><div class="demo-links">
+    
+    
+    <a href="?material=basic">Basic</a>
+    <a href="?material=lambert">Lambert</a>
+    <a href="?material=phong">Phong</a>
+    <a href="?material=pbr">PBR</a>
+    <a href="?material=model">PBR Model</a>
+  </div></nav>
+<p class="hint">Drag to orbit · Mouse wheel to zoom</p></main>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/fflate.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/EXRLoader.js"></script>
+  <script src="../simple-orbit-controls.js"></script>
+  <script src="scene-layout.js"></script>
+  <script>
+    const mode = new URLSearchParams(location.search).get('material') || 'pbr';
+    const names = { basic: 'Basic Material', lambert: 'Lambert Material',
+      phong: 'Phong Material', pbr: 'PBR Material', model: 'PBR Model' };
+    document.title = names[mode] || names.pbr;
+    document.getElementById('title').textContent = document.title;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    
+    renderer.shadowMap.enabled = true;
+    document.querySelector("#material-stage").appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xadd4ed);
+    const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 100);
+    camera.position.set(0, 2, 5);
+    bindMaterialViewport(renderer, camera);
+        const controls = new SimpleOrbitControls(camera, renderer.domElement);
+    controls.update();
+
+    scene.add(new THREE.AmbientLight(0x404040, 1));
+    const sun = new THREE.DirectionalLight(0xffffff, 0.5);
+    sun.position.set(10, 10, 10);
+    sun.castShadow = true;
+    scene.add(sun);
+
+    // The same sphere shows how each material responds to light.
+    const materials = {
+      basic: new THREE.MeshBasicMaterial({ color: 0x00ff00 }),
+      lambert: new THREE.MeshLambertMaterial({ color: 0xff0000 }),
+      phong: new THREE.MeshPhongMaterial({ color: 0x0000ff, shininess: 200 }),
+      pbr: new THREE.MeshStandardMaterial({ color: 0xffcc00, roughness: 0.1, metalness: 0.8 })
+    };
+    if (mode !== 'model') {
+      const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), materials[mode] || materials.pbr);
+      sphere.position.y = 1;
+      sphere.castShadow = true;
+      scene.add(sphere);
+    }
+
+    const floorTexture = new THREE.TextureLoader().load('https://sibsansuk.github.io/mossy_cobblestone_diff_1k.jpg');
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(10, 10),
+      new THREE.MeshStandardMaterial({ map: floorTexture }));
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    if (mode === 'model') {
+      new THREE.GLTFLoader().load('https://sibsansuk.github.io/courses/3dmodel/microscope.glb', gltf => {
+        const model = gltf.scene;
+        model.scale.set(2, 2, 2);
+        model.traverse(part => { if (part.isMesh) part.castShadow = true; });
+        scene.add(model);
+      });
+    }
+
+    // The HDR image provides reflections for the PBR examples.
+    if (mode === 'pbr' || mode === 'model') {
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      new THREE.EXRLoader().setDataType(THREE.UnsignedByteType)
+        .load('https://dl.polyhaven.org/file/ph-assets/HDRIs/exr/1k/venice_sunset_1k.exr', texture => {
+          const environment = pmrem.fromEquirectangular(texture).texture;
+          scene.background = environment;
+          scene.environment = environment;
+          texture.dispose();
+          pmrem.dispose();
+        });
+    }
+
+    
+    function animate() {
+      controls.update();
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+</html>
